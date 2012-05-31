@@ -1,18 +1,6 @@
-# Next version
+# Version 0.5.2
 
-## Highlighted features
-
-* Ruby dependencies are now handled by Bundler
-
-## Upgrade notes
-
-* Existing installations will need to install the Bundler gem.  See
-  `INSTALL.md` for details.
-
-* Because dependencies are now handled by Bundler, when you next run
-  the `rails-post-deploy` script, it will download, compile and
-  install various things.  Part of this is compiling xapian, which may
-  take a *long* time (subsequent deployments should be much faster)
+This is a hotfix to fix occasional problems importing public body CSVs
 
 # Version 0.5.1
 
