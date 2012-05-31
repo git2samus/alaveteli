@@ -21,3 +21,6 @@ TAGS
 .bundle
 .rmvrc
 config/alert-tracks-debian.ugly
+bin/
+config/aliases
+.sass-cache

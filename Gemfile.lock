@@ -1,3 +1,9 @@
+GIT
+  remote: git://github.com/sebbacon/xapian-full.git
+  revision: 8f0f827d5964b28daa72c756e40caabfa2981fd0
+  specs:
+    xapian-full (1.2.9)
+
 GEM
   remote: http://rubygems.org/
   specs:
@@ -61,6 +67,7 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
+  annotate
   fakeweb
   fast_gettext (>= 0.6.0)
   gettext (>= 1.9.3)
@@ -68,6 +75,7 @@ DEPENDENCIES
   locale (>= 2.0.5)
   mahoro
   memcache-client
+  net-purge
   pg
   rack (~> 1.1.0)
   rails (= 2.3.14)
@@ -81,6 +89,6 @@ DEPENDENCIES
   ruby-msg (~> 1.5.0)
   vpim
   will_paginate (~> 2.3.11)
-  xapian-full
+  xapian-full (~> 1.2.9)!
   xml-simple
   zip

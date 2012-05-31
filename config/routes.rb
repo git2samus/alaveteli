@@ -22,6 +22,7 @@ ActionController::Routing::Routes.draw do |map|
         general.blog '/blog', :action => 'blog'
         general.custom_css '/stylesheets/custom.css', :action => 'custom_css'
         general.search_redirect '/search',      :action => 'search_redirect'
+        general.search_redirect '/search/all',      :action => 'search_redirect'
         # XXX combined is the search query, and then if sorted a "/newest" at the end.
         # Couldn't find a way to do this in routes which also picked up multiple other slashes
         # and dots and other characters that can appear in search query. So we sort it all
@@ -65,6 +66,7 @@ ActionController::Routing::Routes.draw do |map|
 
         request.upload_response "/upload/request/:url_title", :action => 'upload_response'
         request.download_entire_request '/request/:url_title/download',      :action => 'download_entire_request'
+        request.report '/request/:url_title/report',      :action => 'report_request'
 
     end
 
@@ -80,6 +82,7 @@ ActionController::Routing::Routes.draw do |map|
         user.show_user '/user/:url_name.:format', :action => 'show'
         user.show_user_profile '/user/:url_name/profile.:format', :action => 'show', :view => 'profile'
         user.show_user_requests '/user/:url_name/requests.:format', :action => 'show', :view => 'requests'
+        user.show_user_wall '/user/:url_name/wall.:format', :action => 'wall'
         user.contact_user '/user/contact/:id', :action => 'contact'
 
         user.signchangepassword '/profile/change_password',      :action => 'signchangepassword'
@@ -90,7 +93,7 @@ ActionController::Routing::Routes.draw do |map|
         user.get_profile_photo '/user/:url_name/photo.png', :action => 'get_profile_photo'
         user.get_draft_profile_photo '/profile/draft_photo/:id.png', :action => 'get_draft_profile_photo'
         user.set_profile_about_me '/profile/set_about_me', :action => 'set_profile_about_me'
-
+        user.set_receive_email_alerts '/profile/set_receive_alerts', :action => 'set_receive_email_alerts'
         user.river '/profile/river', :action => 'river'
     end
 
@@ -117,6 +120,7 @@ ActionController::Routing::Routes.draw do |map|
 
     map.with_options :controller => 'services' do |service|
         service.other_country_message "/country_message", :action => 'other_country_message'
+        service.hidden_user_explanation "/hidden_user_explanation", :action => 'hidden_user_explanation'
     end
 
     map.with_options :controller => 'track' do |track|
@@ -200,6 +204,7 @@ ActionController::Routing::Routes.draw do |map|
         admin.admin_request_show_raw_email '/admin/request/show_raw_email/:id', :action => 'show_raw_email'
         admin.admin_request_download_raw_email '/admin/request/download_raw_email/:id', :action => 'download_raw_email'
         admin.admin_request_clarification '/admin/request/mark_event_as_clarification', :action => 'mark_event_as_clarification'
+        admin.admin_request_hide '/admin/request/hide/:id', :action => 'hide_request'
     end
 
     map.with_options :controller => 'admin_user' do |user|
