@@ -6,10 +6,6 @@ In /etc/postfix/master.cf:
   alaveteli unix  -	n	n	-	50	pipe
     flags=R user=ALAVETELI_USER argv=ALAVETELI_HOME/script/mailin
 
-In /etc/postfix/main.cf
-
-  virtual_alias_maps = regexp:/etc/postfix/regexp
-
 For example
 
 ALAVETELI_HOME=/path/to/alaveteli/software
@@ -17,12 +13,20 @@ ALAVETELI_USER=www-data
 
 The user ALAVETELI_USER should have write permissions on ALAVETELI_HOME.
 
+In /etc/postfix/main.cf
+
+  virtual_alias_maps = regexp:/etc/postfix/regexp
+  fallback_transport_maps = hash:/etc/postfix/transport
+
 And, assuming you set `OPTION_INCOMING_EMAIL_PREFIX` in your config at
 `config/general` to "foi+", create `/etc/postfix/regexp` with the following
 content:
 
   /^foi.*/	alaveteli
 
+In /etc/postfix/transport
+
+  alaveteli  alaveteli:nexthop
 
 You should also configure postfix to discard any messages sent to the `BLACKHOLE_PREFIX`
 address, whose default value is 'do-not-reply-to-this-address'. For example, add the
