@@ -378,6 +378,9 @@ class PublicBody < ActiveRecord::Base
                     email = row[field_names['request_email']]
                     next if name.nil?
 
+                    import = row[field_names['import']]
+                    next if import.nil? || import.downcase != 'yes'
+                    
                     name.strip!
                     email.strip! unless email.nil?
 
