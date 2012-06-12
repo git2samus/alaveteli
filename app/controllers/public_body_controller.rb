@@ -102,9 +102,10 @@ class PublicBodyController < ApplicationController
             conditions = [locale_condition, @query, @query, default_locale]
         elsif @tag == 'other'
             category_list = PublicBodyCategories::get().tags().map{|c| "'"+c+"'"}.join(",")
+            category_list.upcase! unless category_list.nil?
             conditions = [locale_condition + ' AND (select count(*) from has_tag_string_tags where has_tag_string_tags.model_id = public_bodies.id
                 and has_tag_string_tags.model = \'PublicBody\'
-                and has_tag_string_tags.name in (' + category_list + ')) = 0', @query, @query, default_locale]
+                and upper(has_tag_string_tags.name) in (' + category_list + ')) = 0', @query, @query, default_locale]
         elsif @tag.size == 1
             @tag.upcase!
             conditions = [locale_condition + ' AND public_body_translations.first_letter = ?', @query, @query, default_locale, @tag]
@@ -112,11 +113,11 @@ class PublicBodyController < ApplicationController
             name, value = HasTagString::HasTagStringTag.split_tag_into_name_value(@tag)
             conditions = [locale_condition + ' AND (select count(*) from has_tag_string_tags where has_tag_string_tags.model_id = public_bodies.id
                 and has_tag_string_tags.model = \'PublicBody\'
-                and has_tag_string_tags.name = ? and has_tag_string_tags.value = ?) > 0', @query, @query, default_locale, name, value]
+                and upper(has_tag_string_tags.name) = upper(?) and upper(has_tag_string_tags.value) = upper(?)) > 0', @query, @query, default_locale, name, value]
         else
             conditions = [locale_condition + ' AND (select count(*) from has_tag_string_tags where has_tag_string_tags.model_id = public_bodies.id
                 and has_tag_string_tags.model = \'PublicBody\'
-                and has_tag_string_tags.name = ?) > 0', @query, @query, default_locale, @tag]
+                and upper(has_tag_string_tags.name) = upper(?)) > 0', @query, @query, default_locale, @tag]
         end
 
         if @tag == "all"
