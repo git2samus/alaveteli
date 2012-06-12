@@ -361,6 +361,7 @@ class PublicBody < ActiveRecord::Base
                 set_of_importing = Set.new()
                 field_names = { 'name'=>1, 'request_email'=>2 }     # Default values in case no field list is given
                 line = 0
+                
                 CSV.parse(csv) do |row|
                     line = line + 1
 
@@ -400,7 +401,7 @@ class PublicBody < ActiveRecord::Base
                                     localized_value = field_names[localized_field_name] && row[field_names[localized_field_name]]
                                     
                                     # Tags are a special case, as we support adding to the field, not just setting a new value
-                                    if localized_field_name == 'tag_string'
+                                    if localized_field_name == 'tag_string'                                        
                                         if localized_value.nil?
                                             localized_value = tag unless tag.empty?
                                         else
@@ -435,7 +436,7 @@ class PublicBody < ActiveRecord::Base
                                     localized_value = field_names[localized_field_name] && row[field_names[localized_field_name]]
 
                                     if localized_field_name == 'tag_string' and tag_behaviour == 'add'
-                                        localized_value = "#{localized_value} #{tag}" unless tag.empty?
+                                      localized_value = "#{localized_value} #{tag}" unless tag.empty?
                                     end
                                 
                                     if !localized_value.nil? and public_body.send(field_name) != localized_value
