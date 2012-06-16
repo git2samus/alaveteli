@@ -465,7 +465,7 @@ class RequestController < ApplicationController
             flash[:notice] = _("Oh no! Sorry to hear that your request was refused. Here is what to do now.")
             redirect_to unhappy_url(@info_request)
         elsif @info_request.calculate_status == 'successful'
-            flash[:notice] = _("<p>We're glad you got all the information that you wanted. If you write about or make use of the information, please come back and add an annotation below saying what you did.</p><p>If you found {{site_name}} useful, <a href=\"{{donation_url}}\">make a donation</a> to the charity which runs it.</p>", :site_name=>site_name, :donation_url => "http://www.mysociety.org/donate/")
+            flash[:notice] = _("<p>We're glad you got all the information that you wanted. If you write about or make use of the information, please come back and add an annotation below saying what you did.</p><p>If you found {{site_name}} useful, <a href=\"{{donation_url}}\">make a donation</a> to the charity which runs it.</p>", :site_name=>site_name, :donation_url => "http://datauy.org/donar/")
             redirect_to request_url(@info_request)
         elsif @info_request.calculate_status == 'partially_successful'
             flash[:notice] = _("<p>We're glad you got some of the information that you wanted. If you found {{site_name}} useful, <a href=\"{{donation_url}}\">make a donation</a> to the charity which runs it.</p><p>If you want to try and get the rest of the information, here's what to do now.</p>", :site_name=>site_name, :donation_url=>"http://www.mysociety.org/donate/")
