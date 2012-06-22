@@ -22,3 +22,4 @@ TAGS
 .rmvrc
 config/alert-tracks-debian.ugly
 .project
+/commonlib/*
