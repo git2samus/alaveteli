@@ -33,6 +33,9 @@ namespace :deploy do
     run "sudo ln -nfs #{shared_path}/system/config/database.yml #{release_path}/config/database.yml" 
     run "sudo ln -nfs #{shared_path}/system/config/general.yml #{release_path}/config/general.yml" 
     run "sudo ln -nfs #{shared_path}/system/config/i18n-routes.yml #{release_path}/config/i18n-routes.yml"  
+    
+    run "sudo rm -f -R #{release_path}/vendor/plugins/acts_as_xapian/xapiandbs"
+    run "sudo ln -nfs #{shared_path}/system/xapiandbs/ #{release_path}/vendor/plugins/acts_as_xapian/xapiandbs"
   end
 
   task :update_permissions do
