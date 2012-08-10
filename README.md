@@ -1,21 +1,7 @@
-# Welcome to Alaveteli!
+# Bienvenidos al software que corre detras de www.quesabes.org
 
-This is an open source project to create a standard, internationalised
-platform for making Freedom of Information (FOI) requests in different
-countries around the world. The software started off life as
-[WhatDoTheyKnow](http://github.com), a website produced by
-[mySociety](http://mysociety.org) for making FOI requests in the UK.
+Alavateli es un proyecto de codigo libre para crear una plataforma estandar e internazionalizada para hacer pedidos de información pública (FOI) en diferentes paises alrededor del mundo. El software fue empezado por [WhatDoTheyKnow](http://github.com/sebbacon/alaveteli), un sitio web producido por [mySociety](http://mysociety.org) para hacer pedidos de FOI en Inglaterra.
 
-We hope that by joining forces between teams across the world, we can
-all work together on producing the best possible software, and help
-move towards a world where governments approach transparency as the
-norm, rather than the exception.
+QueSabes es la version uruguaya de esta idea. 
 
-Please join our mailing list at
-https://groups.google.com/group/alaveteli-dev and introduce yourself.
-
-Some documentation can be found in the [`doc/` folder](https://github.com/sebbacon/alaveteli/tree/master/doc).  There's
-background information and a little more documentation on
-[our wiki](https://github.com/sebbacon/alaveteli/wiki/Home/), and
-hopefully we'll make [our homepage](http://alaveteli.org) more useful
-in due course.
+Documentación (en ingles) puede ser encontrada en [la carpeta `doc/`](https://github.com/sebbacon/alaveteli/tree/master/doc).  También hay más info sobre organización en [el wiki de alaveteli](https://github.com/sebbacon/alaveteli/wiki/Home/), y seguramente [la página de alaveteli](http://alaveteli.org) sea muy util para tener una idea más amplia del proyecto.
