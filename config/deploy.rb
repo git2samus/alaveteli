@@ -36,6 +36,7 @@ namespace :deploy do
     
     run "sudo rm -f -R #{release_path}/vendor/plugins/acts_as_xapian/xapiandbs"
     run "sudo ln -nfs #{shared_path}/system/xapiandbs/ #{release_path}/vendor/plugins/acts_as_xapian/xapiandbs"
+    run "sudo ln -nfs #{shared_path}/system/files/ #{release_path}/files"
   end
 
   task :update_permissions do
