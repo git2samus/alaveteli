@@ -55,11 +55,12 @@ namespace :deploy do
   end
 end
 
+# task to clean out all deployments (it keeps the last :keep_releases).
 after "deploy:update", "deploy:cleanup"
-after "deploy:update_code", "deploy:update_permissions"
-after "deploy:update_permissions", "deploy:config_links"
+after "deploy:update_code", "deploy:config_links"
 after "deploy:config_links", "deploy:migrate"
 after "deploy:migrate", "deploy:update_theme"
+after "deploy:update_theme", "deploy:update_permissions"
 after "deploy:create_symlink", "deploy:site_links"
 
 
