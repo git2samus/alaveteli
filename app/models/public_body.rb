@@ -27,9 +27,6 @@
 #
 # $Id: public_body.rb,v 1.160 2009-10-02 22:56:35 francis Exp $
 
-require 'csv'
-require 'set'
-
 class PublicBody < ActiveRecord::Base
     strip_attributes!
 
@@ -43,7 +40,7 @@ class PublicBody < ActiveRecord::Base
     has_many :track_things, :order => 'created_at desc'
 
     has_tag_string
-   
+
     translates :name, :short_name, :request_email, :url_name, :notes, :first_letter, :publication_scheme
 
     # Convenience methods for creating/editing translations via forms
@@ -58,11 +55,11 @@ class PublicBody < ActiveRecord::Base
         short_long_name = t.short_name if t.short_name and !t.short_name.empty?
         t.url_name = MySociety::Format.simplify_url_part(short_long_name, 'body')
     end
-    
+
     def translated_versions
         translations
     end
-    
+
     def translated_versions=(translation_attrs)
         def skip?(attrs)
             valueless = attrs.inject({}) { |h, (k, v)| h[k] = v if v != '' and k != 'locale'; h } # because we want to fall back to alternative translations where there are empty values
@@ -86,7 +83,7 @@ class PublicBody < ActiveRecord::Base
             end
         end
     end
-    
+
     # Make sure publication_scheme gets the correct default value.
     # (This would work automatically, were publication_scheme not a translated attribute)
     def after_initialize
@@ -96,7 +93,7 @@ class PublicBody < ActiveRecord::Base
     # like find_by_url_name but also search historic url_name if none found
     def self.find_by_url_name_with_historic(name)
         locale = self.locale || I18n.locale
-        PublicBody.with_locale(locale) do 
+        PublicBody.with_locale(locale) do
             found = PublicBody.find(:all,
                                     :conditions => ["public_body_translations.url_name='#{name}'"],
                                     :joins => :translations,
@@ -192,15 +189,15 @@ class PublicBody < ActiveRecord::Base
     end
 
     acts_as_xapian :texts => [ :name, :short_name, :notes ],
-        :values => [ 
+        :values => [
              [ :created_at_numeric, 1, "created_at", :number ] # for sorting
         ],
         :terms => [ [ :variety, 'V', "variety" ],
-                [ :tag_array_for_search, 'U', "tag" ] 
+                [ :tag_array_for_search, 'U', "tag" ]
         ]
     def created_at_numeric
         # format it here as no datetime support in Xapian's value ranges
-        return self.created_at.strftime("%Y%m%d%H%M%S") 
+        return self.created_at.strftime("%Y%m%d%H%M%S")
     end
     def variety
         return "authority"
@@ -236,7 +233,7 @@ class PublicBody < ActiveRecord::Base
     def update_url_name
         self.url_name = MySociety::Format.simplify_url_part(self.short_or_long_name, 'body')
     end
-    
+
     # Return the short name if present, or else long name
     def short_or_long_name
         if self.short_name.nil? || self.short_name.empty?   # 'nil' can happen during construction
@@ -253,7 +250,7 @@ class PublicBody < ActiveRecord::Base
         first = true
         for tag in self.tags
             if PublicBodyCategories::get().by_tag().include?(tag.name)
-                desc = PublicBodyCategories::get().singular_by_tag()[tag.name] 
+                desc = PublicBodyCategories::get().singular_by_tag()[tag.name]
                 if first
                     # terrible that Ruby/Rails doesn't have an equivalent of ucfirst
                     # (capitalize shockingly converts later characters to lowercase)
@@ -270,7 +267,7 @@ class PublicBody < ActiveRecord::Base
         if types.size > 0
             ret = types[0, types.size - 1].join(", ")
             if types.size > 1
-                ret = ret + " and " 
+                ret = ret + " and "
             end
             ret = ret + types[-1]
             return ret
@@ -293,6 +290,7 @@ class PublicBody < ActiveRecord::Base
     def eir_only?
         return self.has_tag?('eir_only')
     end
+
     def law_only_short
         if self.eir_only?
             return "EIR"
@@ -328,155 +326,6 @@ class PublicBody < ActiveRecord::Base
         end
     end
 
-
-    class ImportCSVDryRun < StandardError
-    end
-
-    # Import from CSV. Just tests things and returns messages if dry_run is true.
-    # Returns an array of [array of errors, array of notes]. If there are errors,
-    # always rolls back (as with dry_run).
-    def self.import_csv(csv, tag, tag_behaviour, dry_run, editor, available_locales = [])
-        errors = []
-        notes = []
-        available_locales = [I18n.default_locale] if available_locales.empty?
-
-        begin
-            ActiveRecord::Base.transaction do
-                # Use the default locale when retrieving existing bodies; otherwise
-                # matching names won't work afterwards, and we'll create new bodies instead
-                # of updating them
-                bodies_by_name = {}
-                set_of_existing = Set.new()
-                PublicBody.with_locale(I18n.default_locale) do
-                    bodies = (tag.nil? || tag.empty?) ? PublicBody.find(:all) : PublicBody.find_by_tag(tag)
-                    for existing_body in bodies
-                        # Hide InternalAdminBody from import notes
-                        next if existing_body.id == PublicBody.internal_admin_body.id
-                        
-                        bodies_by_name[existing_body[:name]] = existing_body
-                        set_of_existing.add(existing_body[:name])
-                    end
-                end
-                
-                set_of_importing = Set.new()
-                field_names = { 'name'=>1, 'request_email'=>2 }     # Default values in case no field list is given
-                line = 0
-                
-                CSV.parse(csv) do |row|
-                    line = line + 1
-
-                    # Parse the first line as a field list if it starts with '#'
-                    if line==1 and row.first.to_s =~ /^#(.*)$/
-                        row[0] = row[0][1..-1]  # Remove the # sign on first field
-                        row.each_with_index {|field, i| field_names[field] = i}
-                        next
-                    end
-
-                    fields = {}
-                    field_names.each{|name, i| fields[name] = row[i]}
-    
-                    name = row[field_names['name']]
-                    email = row[field_names['request_email']]
-                    next if name.nil?
-
-                    import = row[field_names['import']]
-                    next if import.nil? || import.downcase != 'yes'
-                    
-                    name.strip!
-                    email.strip! unless email.nil?
-
-                    if !email.nil? && !email.empty? && !MySociety::Validate.is_valid_email(email)
-                        errors.push "error: line #{line.to_s}: invalid email '#{email}' for authority '#{name}'"
-                        next
-                    end
-                    
-                    field_list = ['name', 'short_name', 'request_email', 'notes', 'publication_scheme', 'home_page', 'tag_string']
-
-                    if public_body = bodies_by_name[name]   # Existing public body
-                        available_locales.each do |locale|
-                            PublicBody.with_locale(locale) do
-                                changed = ActiveSupport::OrderedHash.new
-                                field_list.each do |field_name|
-                                    localized_field_name = (locale.to_s == I18n.default_locale.to_s) ? field_name : "#{field_name}.#{locale}"
-                                    localized_value = field_names[localized_field_name] && row[field_names[localized_field_name]]
-                                    
-                                    # Tags are a special case, as we support adding to the field, not just setting a new value
-                                    if localized_field_name == 'tag_string'                                        
-                                        if localized_value.nil?
-                                            localized_value = tag unless tag.empty?
-                                        else
-                                            if tag_behaviour == 'add'
-                                                localized_value = "#{localized_value} #{tag}" unless tag.empty?
-                                                localized_value = "#{localized_value} #{public_body.tag_string}" 
-                                            end
-                                        end
-                                    end
-                                    
-                                    if !localized_value.nil? and public_body.send(field_name) != localized_value
-                                        changed[field_name] = "#{public_body.send(field_name)}: #{localized_value}"
-                                        public_body.send("#{field_name}=", localized_value)
-                                    end
-                                end
-
-                                unless changed.empty?
-                                    notes.push "line #{line.to_s}: updating authority '#{name}' (locale: #{locale}):\n\t#{changed.to_json}"
-                                    public_body.last_edit_editor = editor
-                                    public_body.last_edit_comment = 'Updated from spreadsheet'                            
-                                    public_body.save!
-                                end
-                            end
-                        end
-                    else # New public body
-                        public_body = PublicBody.new(:name=>"", :short_name=>"", :request_email=>"")
-                        available_locales.each do |locale|                            
-                            PublicBody.with_locale(locale) do
-                                changed = ActiveSupport::OrderedHash.new
-                                field_list.each do |field_name|
-                                    localized_field_name = (locale.to_s == I18n.default_locale.to_s) ? field_name : "#{field_name}.#{locale}"
-                                    localized_value = field_names[localized_field_name] && row[field_names[localized_field_name]]
-
-                                    if localized_field_name == 'tag_string' and tag_behaviour == 'add'
-                                      localized_value = "#{localized_value} #{tag}" unless tag.empty?
-                                    end
-                                
-                                    if !localized_value.nil? and public_body.send(field_name) != localized_value
-                                        changed[field_name] = localized_value
-                                        public_body.send("#{field_name}=", localized_value)
-                                    end
-                                end
-
-                                unless changed.empty?
-                                    notes.push "line #{line.to_s}: creating new authority '#{name}' (locale: #{locale}):\n\t#{changed.to_json}"
-                                    public_body.publication_scheme = public_body.publication_scheme || ""
-                                    public_body.last_edit_editor = editor
-                                    public_body.last_edit_comment = 'Created from spreadsheet'                            
-                                    public_body.save!
-                                end
-                            end
-                        end
-                    end
-
-                    set_of_importing.add(name)
-                end
-
-                # Give an error listing ones that are to be deleted 
-                deleted_ones = set_of_existing - set_of_importing
-                if deleted_ones.size > 0
-                    notes.push "Notes: Some " + tag + " bodies are in database, but not in CSV file:\n    " + Array(deleted_ones).sort.join("\n    ") + "\nYou may want to delete them manually.\n"
-                end
-
-                # Rollback if a dry run, or we had errors
-                if dry_run or errors.size > 0
-                    raise ImportCSVDryRun
-                end
-            end
-        rescue ImportCSVDryRun
-            # Ignore
-        end
-
-        return [errors, notes]
-    end
-
     # Does this user have the power of FOI officer for this body?
     def is_foi_officer?(user)
         user_domain = user.email_domain
@@ -488,6 +337,7 @@ class PublicBody < ActiveRecord::Base
 
         return our_domain == user_domain
     end
+
     def foi_officer_domain_required
         return self.request_email_domain
     end
@@ -519,6 +369,7 @@ class PublicBody < ActiveRecord::Base
     def reverse_sorted_versions
         self.versions.sort { |a,b| b.version <=> a.version }
     end
+
     def sorted_versions
         self.versions.sort { |a,b| a.version <=> b.version }
     end
@@ -526,16 +377,18 @@ class PublicBody < ActiveRecord::Base
     def has_notes?
         return self.notes != ""
     end
+
     def notes_as_html
         self.notes
     end
+
     def notes_without_html
         # assume notes are reasonably behaved HTML, so just use simple regexp on this
         self.notes.nil? ? '' : self.notes.gsub(/<\/?[^>]*>/, "")
     end
 
     def json_for_api
-        return { 
+        return {
             :id => self.id,
             :url_name => self.url_name,
             :name => self.name,
@@ -543,7 +396,7 @@ class PublicBody < ActiveRecord::Base
             # :request_email  # we hide this behind a captcha, to stop people doing bulk requests easily
             :created_at => self.created_at,
             :updated_at => self.updated_at,
-            # don't add the history as some edit comments contain sensitive information 
+            # don't add the history as some edit comments contain sensitive information
             # :version, :last_edit_editor, :last_edit_comment
             :home_page => self.calculated_home_page,
             :notes => self.notes,
