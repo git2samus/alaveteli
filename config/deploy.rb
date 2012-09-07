@@ -30,21 +30,22 @@ set :keep_releases, 3
 
 namespace :deploy do
   task :config_links do
-    run "sudo ln -nfs #{shared_path}/system/config/database.yml #{release_path}/config/database.yml" 
-    run "sudo ln -nfs #{shared_path}/system/config/general.yml #{release_path}/config/general.yml" 
-    run "sudo ln -nfs #{shared_path}/system/config/i18n-routes.yml #{release_path}/config/i18n-routes.yml"  
-    
+    run "sudo ln -nfs #{shared_path}/system/config/database.yml #{release_path}/config/database.yml"
+    run "sudo ln -nfs #{shared_path}/system/config/general.yml #{release_path}/config/general.yml"
+    run "sudo ln -nfs #{shared_path}/system/config/i18n-routes.yml #{release_path}/config/i18n-routes.yml"
+    run "sudo ln -nfs #{shared_path}/system/config/rails_env.rb #{release_path}/config/rails_env.rb"
+
     run "sudo rm -f -R #{release_path}/vendor/plugins/acts_as_xapian/xapiandbs"
     run "sudo ln -nfs #{shared_path}/system/xapiandbs/ #{release_path}/vendor/plugins/acts_as_xapian/xapiandbs"
     run "sudo ln -nfs #{shared_path}/system/files #{release_path}/files"
   end
 
   task :update_permissions do
-      run "sudo chown -R www-data:deploy #{shared_path}" 
-      run "sudo chown -R www-data:deploy #{release_path}" 
+      run "sudo chown -R www-data:deploy #{shared_path}"
+      run "sudo chown -R www-data:deploy #{release_path}"
       run "sudo chmod -R ug+rw #{release_path}"
   end
-    
+
   task :update_theme do
       run "cd #{release_path} && sudo #{release_path}/script/plugin install 'git://github.com/sebbacon/adminbootstraptheme.git'"
       run "cd #{release_path} && sudo #{release_path}/script/plugin install 'git://github.com/datauy/quesabes-theme.git'"
