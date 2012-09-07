@@ -29,6 +29,7 @@ set :keep_releases, 3
 # after "deploy:restart", "deploy:cleanup"
 
 namespace :deploy do
+  desc "config_links"
   task :config_links do
     run "sudo ln -nfs #{shared_path}/system/config/database.yml #{release_path}/config/database.yml"
     run "sudo ln -nfs #{shared_path}/system/config/general.yml #{release_path}/config/general.yml"
@@ -61,8 +62,8 @@ after "deploy:update", "deploy:cleanup"
 after "deploy:update_code", "deploy:config_links"
 after "deploy:config_links", "deploy:migrate"
 after "deploy:migrate", "deploy:update_theme"
-after "deploy:update_theme", "deploy:update_permissions"
 after "deploy:create_symlink", "deploy:site_links"
+after "deploy:site_links", "deploy:update_permissions"
 
 
 # If you are using Passenger mod_rails uncomment this:
