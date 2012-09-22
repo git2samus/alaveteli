@@ -1,5 +1,6 @@
 require 'bundler/capistrano'
 
+<<<<<<< HEAD
 set :user, "deploy"
 set :application, "alaveteli"
 
@@ -36,6 +37,7 @@ namespace :xapian do
   end
 end
 
+<<<<<<< HEAD
 
 namespace :deploy do
   desc 'Link configuration after a code update'
@@ -55,7 +57,7 @@ namespace :deploy do
     # "ln -sf <a> <b>" creates a symbolic link but deletes <b> if it already exists
     run links.map {|a| "ln -sf #{a.first} #{a.last}"}.join(";")
   end
-  
+
   task :update_permissions do
       run "sudo chown -R www-data:deploy #{shared_path}"
       run "sudo chown -R www-data:deploy #{release_path}"
@@ -88,4 +90,3 @@ after "deploy:site_links", "deploy:update_permissions"
 #   task :restart, :roles => :app, :except => { :no_release => true } do
 #     run "#{try_sudo} touch #{File.join(current_path,'tmp','restart.txt')}"
 #   end
-# end

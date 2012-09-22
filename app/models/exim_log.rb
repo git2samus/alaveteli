@@ -1,5 +1,5 @@
 # == Schema Information
-# Schema version: 108
+# Schema version: 114
 #
 # Table name: exim_logs
 #
@@ -40,7 +40,7 @@ class EximLog < ActiveRecord::Base
 
         ActiveRecord::Base.transaction do
             # see if we already have it
-            done = EximLogDone.find_by_filename(file_name_db)  
+            done = EximLogDone.find_by_filename(file_name_db)
             if !done.nil?
                 if modified.utc == done.last_stat.utc
                     # already have that, nothing to do
@@ -94,7 +94,7 @@ class EximLog < ActiveRecord::Base
         # Get all requests sent for from 2 to 10 days ago. The 2 day gap is
         # because we load exim log lines via cron at best an hour after they
         # are made)
-        irs = InfoRequest.find(:all, :conditions => [ "created_at < ? and created_at > ?", Time.now() - 2.day, Time.now() - 10.days ] )
+        irs = InfoRequest.find(:all, :conditions => [ "created_at < ? and created_at > ? and user_id is not null", Time.now() - 2.day, Time.now() - 10.days ] )
 
         # Go through each request and check it
         ok = true
@@ -124,7 +124,7 @@ class EximLog < ActiveRecord::Base
 
         return ok
     end
-    
+
 end
 
 

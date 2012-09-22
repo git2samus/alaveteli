@@ -1,5 +1,5 @@
+# -*- coding: utf-8 -*-
 # == Schema Information
-# Schema version: 95
 #
 # Table name: public_bodies
 #
@@ -17,8 +17,8 @@
 #  notes              :text            default(""), not null
 #  first_letter       :string(255)     not null
 #  publication_scheme :text            default(""), not null
+#  api_key            :string(255)     not null
 #
-
 # models/public_body.rb:
 # A public body, from which information can be requested.
 #
@@ -28,6 +28,7 @@
 # $Id: public_body.rb,v 1.160 2009-10-02 22:56:35 francis Exp $
 
 require 'csv'
+require 'securerandom'
 require 'set'
 
 class PublicBody < ActiveRecord::Base
@@ -41,9 +42,12 @@ class PublicBody < ActiveRecord::Base
 
     has_many :info_requests, :order => 'created_at desc'
     has_many :track_things, :order => 'created_at desc'
+    has_many :censor_rules, :order => 'created_at desc'
 
     has_tag_string
-   
+    before_save :set_api_key, :set_default_publication_scheme
+
+
     translates :name, :short_name, :request_email, :url_name, :notes, :first_letter, :publication_scheme
 
     # Convenience methods for creating/editing translations via forms
@@ -58,11 +62,11 @@ class PublicBody < ActiveRecord::Base
         short_long_name = t.short_name if t.short_name and !t.short_name.empty?
         t.url_name = MySociety::Format.simplify_url_part(short_long_name, 'body')
     end
-    
+
     def translated_versions
         translations
     end
-    
+
     def translated_versions=(translation_attrs)
         def skip?(attrs)
             valueless = attrs.inject({}) { |h, (k, v)| h[k] = v if v != '' and k != 'locale'; h } # because we want to fall back to alternative translations where there are empty values
@@ -86,19 +90,23 @@ class PublicBody < ActiveRecord::Base
             end
         end
     end
-    
-    # Make sure publication_scheme gets the correct default value.
-    # (This would work automatically, were publication_scheme not a translated attribute)
-    def after_initialize
+
+    def set_default_publication_scheme
+      # Make sure publication_scheme gets the correct default value.
+      # (This would work automatically, were publication_scheme not a translated attribute)
       self.publication_scheme = "" if self.publication_scheme.nil?
+    end
+
+    def set_api_key
+      self.api_key = SecureRandom.base64(33) if self.api_key.nil?
     end
 
     # like find_by_url_name but also search historic url_name if none found
     def self.find_by_url_name_with_historic(name)
         locale = self.locale || I18n.locale
-        PublicBody.with_locale(locale) do 
+        PublicBody.with_locale(locale) do
             found = PublicBody.find(:all,
-                                    :conditions => ["public_body_translations.url_name='#{name}'"],
+                                    :conditions => ["public_body_translations.url_name=?", name],
                                     :joins => :translations,
                                     :readonly => false)
             # If many bodies are found (usually because the url_name is the same across
@@ -178,7 +186,7 @@ class PublicBody < ActiveRecord::Base
     end
 
     acts_as_versioned
-    self.non_versioned_columns << 'created_at' << 'updated_at' << 'first_letter'
+    self.non_versioned_columns << 'created_at' << 'updated_at' << 'first_letter' << 'api_key' << 'info_requests_count'
     class Version
         attr_accessor :created_at
 
@@ -189,18 +197,37 @@ class PublicBody < ActiveRecord::Base
             text = text.gsub(/\n/, '<br>')
             return text
         end
+
+        def compare(previous = nil)
+          if previous.nil?
+            yield([])
+          else
+            v = self
+            changes = self.class.content_columns.inject([]) {|memo, c|
+              unless %w(version last_edit_editor last_edit_comment updated_at).include?(c.name)
+                from = previous.send(c.name)
+                to = self.send(c.name)
+                memo << { :name => c.human_name, :from => from, :to => to } if from != to
+              end
+              memo
+            }
+            changes.each do |change|
+              yield(change)
+            end
+          end
+        end
     end
 
     acts_as_xapian :texts => [ :name, :short_name, :notes ],
-        :values => [ 
+        :values => [
              [ :created_at_numeric, 1, "created_at", :number ] # for sorting
         ],
         :terms => [ [ :variety, 'V', "variety" ],
-                [ :tag_array_for_search, 'U', "tag" ] 
+                [ :tag_array_for_search, 'U', "tag" ]
         ]
     def created_at_numeric
         # format it here as no datetime support in Xapian's value ranges
-        return self.created_at.strftime("%Y%m%d%H%M%S") 
+        return self.created_at.strftime("%Y%m%d%H%M%S")
     end
     def variety
         return "authority"
@@ -236,7 +263,7 @@ class PublicBody < ActiveRecord::Base
     def update_url_name
         self.url_name = MySociety::Format.simplify_url_part(self.short_or_long_name, 'body')
     end
-    
+
     # Return the short name if present, or else long name
     def short_or_long_name
         if self.short_name.nil? || self.short_name.empty?   # 'nil' can happen during construction
@@ -253,7 +280,7 @@ class PublicBody < ActiveRecord::Base
         first = true
         for tag in self.tags
             if PublicBodyCategories::get().by_tag().include?(tag.name)
-                desc = PublicBodyCategories::get().singular_by_tag()[tag.name] 
+                desc = PublicBodyCategories::get().singular_by_tag()[tag.name]
                 if first
                     # terrible that Ruby/Rails doesn't have an equivalent of ucfirst
                     # (capitalize shockingly converts later characters to lowercase)
@@ -270,7 +297,7 @@ class PublicBody < ActiveRecord::Base
         if types.size > 0
             ret = types[0, types.size - 1].join(", ")
             if types.size > 1
-                ret = ret + " and " 
+                ret = ret + " and "
             end
             ret = ret + types[-1]
             return ret
@@ -352,16 +379,17 @@ class PublicBody < ActiveRecord::Base
                     for existing_body in bodies
                         # Hide InternalAdminBody from import notes
                         next if existing_body.id == PublicBody.internal_admin_body.id
-                        
+
                         bodies_by_name[existing_body[:name]] = existing_body
                         set_of_existing.add(existing_body[:name])
+
                     end
                 end
-                
+
                 set_of_importing = Set.new()
                 field_names = { 'name'=>1, 'request_email'=>2 }     # Default values in case no field list is given
                 line = 0
-                
+
                 CSV.parse(csv) do |row|
                     line = line + 1
 
@@ -374,14 +402,14 @@ class PublicBody < ActiveRecord::Base
 
                     fields = {}
                     field_names.each{|name, i| fields[name] = row[i]}
-    
+
                     name = row[field_names['name']]
                     email = row[field_names['request_email']]
                     next if name.nil?
 
                     import = row[field_names['import']]
                     next if import.nil? || import.downcase != 'yes'
-                    
+
                     name.strip!
                     email.strip! unless email.nil?
 
@@ -389,7 +417,7 @@ class PublicBody < ActiveRecord::Base
                         errors.push "error: line #{line.to_s}: invalid email '#{email}' for authority '#{name}'"
                         next
                     end
-                    
+
                     field_list = ['name', 'short_name', 'request_email', 'notes', 'publication_scheme', 'home_page', 'tag_string']
 
                     if public_body = bodies_by_name[name]   # Existing public body
@@ -399,19 +427,19 @@ class PublicBody < ActiveRecord::Base
                                 field_list.each do |field_name|
                                     localized_field_name = (locale.to_s == I18n.default_locale.to_s) ? field_name : "#{field_name}.#{locale}"
                                     localized_value = field_names[localized_field_name] && row[field_names[localized_field_name]]
-                                    
+
                                     # Tags are a special case, as we support adding to the field, not just setting a new value
-                                    if localized_field_name == 'tag_string'                                        
+                                    if localized_field_name == 'tag_string'
                                         if localized_value.nil?
                                             localized_value = tag unless tag.empty?
                                         else
                                             if tag_behaviour == 'add'
                                                 localized_value = "#{localized_value} #{tag}" unless tag.empty?
-                                                localized_value = "#{localized_value} #{public_body.tag_string}" 
+                                                localized_value = "#{localized_value} #{public_body.tag_string}"
                                             end
                                         end
                                     end
-                                    
+
                                     if !localized_value.nil? and public_body.send(field_name) != localized_value
                                         changed[field_name] = "#{public_body.send(field_name)}: #{localized_value}"
                                         public_body.send("#{field_name}=", localized_value)
@@ -421,14 +449,14 @@ class PublicBody < ActiveRecord::Base
                                 unless changed.empty?
                                     notes.push "line #{line.to_s}: updating authority '#{name}' (locale: #{locale}):\n\t#{changed.to_json}"
                                     public_body.last_edit_editor = editor
-                                    public_body.last_edit_comment = 'Updated from spreadsheet'                            
+                                    public_body.last_edit_comment = 'Updated from spreadsheet'
                                     public_body.save!
                                 end
                             end
                         end
                     else # New public body
                         public_body = PublicBody.new(:name=>"", :short_name=>"", :request_email=>"")
-                        available_locales.each do |locale|                            
+                        available_locales.each do |locale|
                             PublicBody.with_locale(locale) do
                                 changed = ActiveSupport::OrderedHash.new
                                 field_list.each do |field_name|
@@ -438,7 +466,7 @@ class PublicBody < ActiveRecord::Base
                                     if localized_field_name == 'tag_string' and tag_behaviour == 'add'
                                       localized_value = "#{localized_value} #{tag}" unless tag.empty?
                                     end
-                                
+
                                     if !localized_value.nil? and public_body.send(field_name) != localized_value
                                         changed[field_name] = localized_value
                                         public_body.send("#{field_name}=", localized_value)
@@ -449,7 +477,7 @@ class PublicBody < ActiveRecord::Base
                                     notes.push "line #{line.to_s}: creating new authority '#{name}' (locale: #{locale}):\n\t#{changed.to_json}"
                                     public_body.publication_scheme = public_body.publication_scheme || ""
                                     public_body.last_edit_editor = editor
-                                    public_body.last_edit_comment = 'Created from spreadsheet'                            
+                                    public_body.last_edit_comment = 'Created from spreadsheet'
                                     public_body.save!
                                 end
                             end
@@ -459,7 +487,7 @@ class PublicBody < ActiveRecord::Base
                     set_of_importing.add(name)
                 end
 
-                # Give an error listing ones that are to be deleted 
+                # Give an error listing ones that are to be deleted
                 deleted_ones = set_of_existing - set_of_importing
                 if deleted_ones.size > 0
                     notes.push "Notes: Some " + tag + " bodies are in database, but not in CSV file:\n    " + Array(deleted_ones).sort.join("\n    ") + "\nYou may want to delete them manually.\n"
@@ -524,18 +552,19 @@ class PublicBody < ActiveRecord::Base
     end
 
     def has_notes?
-        return self.notes != ""
+        return !self.notes.nil? && self.notes != ""
     end
     def notes_as_html
         self.notes
     end
+
     def notes_without_html
         # assume notes are reasonably behaved HTML, so just use simple regexp on this
-        self.notes.nil? ? '' : self.notes.gsub(/<\/?[^>]*>/, "")
+        @notes_without_html ||= (self.notes.nil? ? '' : self.notes.gsub(/<\/?[^>]*>/, ""))
     end
 
     def json_for_api
-        return { 
+        return {
             :id => self.id,
             :url_name => self.url_name,
             :name => self.name,
@@ -543,7 +572,7 @@ class PublicBody < ActiveRecord::Base
             # :request_email  # we hide this behind a captcha, to stop people doing bulk requests easily
             :created_at => self.created_at,
             :updated_at => self.updated_at,
-            # don't add the history as some edit comments contain sensitive information 
+            # don't add the history as some edit comments contain sensitive information
             # :version, :last_edit_editor, :last_edit_comment
             :home_page => self.calculated_home_page,
             :notes => self.notes,
@@ -552,6 +581,15 @@ class PublicBody < ActiveRecord::Base
         }
     end
 
+    after_save(:purge_in_cache)
+    def purge_in_cache
+        self.info_requests.each {|x| x.purge_in_cache}
+    end
+
+    def for_admin_column
+        self.class.content_columns.map{|c| c unless %w(name last_edit_comment).include?(c.name)}.compact.each do |column|
+            yield(column.human_name, self.send(column.name), column.type.to_s, column.name)
+        end
+    end
+
 end
-
-

@@ -7,30 +7,30 @@
 #
 # $Id: public_body_controller.rb,v 1.8 2009-09-14 13:27:00 francis Exp $
 
-require 'csv'
+require 'fastercsv'
 
 class PublicBodyController < ApplicationController
     # XXX tidy this up with better error messages, and a more standard infrastructure for the redirect to canonical URL
     def show
         long_cache
         if MySociety::Format.simplify_url_part(params[:url_name], 'body') != params[:url_name]
-            redirect_to :url_name =>  MySociety::Format.simplify_url_part(params[:url_name], 'body'), :status => :moved_permanently 
+            redirect_to :url_name =>  MySociety::Format.simplify_url_part(params[:url_name], 'body'), :status => :moved_permanently
             return
         end
         @locale = self.locale_from_params()
-        PublicBody.with_locale(@locale) do 
+        PublicBody.with_locale(@locale) do
             @public_body = PublicBody.find_by_url_name_with_historic(params[:url_name])
             raise ActiveRecord::RecordNotFound.new("None found") if @public_body.nil?
             if @public_body.url_name.nil?
                 redirect_to :back
                 return
-            end 
+            end
             # If found by historic name, or alternate locale name, redirect to new name
             if  @public_body.url_name != params[:url_name]
-                redirect_to show_public_body_url(:url_name => @public_body.url_name) 
+                redirect_to show_public_body_url(:url_name => @public_body.url_name)
                 return
             end
-               
+
             set_last_body(@public_body)
 
             top_url = main_url("/")
@@ -50,8 +50,8 @@ class PublicBodyController < ApplicationController
             begin
                 @xapian_requests = perform_search([InfoRequestEvent], query, sortby, 'request_collapse')
                 if (@page > 1)
-                    @page_desc = " (page " + @page.to_s + ")" 
-                else    
+                    @page_desc = " (page " + @page.to_s + ")"
+                else
                     @page_desc = ""
                 end
             rescue
@@ -65,7 +65,7 @@ class PublicBodyController < ApplicationController
                 format.html { @has_json = true; render :template => "public_body/show"}
                 format.json { render :json => @public_body.json_for_api }
             end
-            
+
         end
     end
 
@@ -93,8 +93,8 @@ class PublicBodyController < ApplicationController
         @tag = params[:tag]
         @locale = self.locale_from_params()
         default_locale = I18n.default_locale.to_s
-        locale_condition = "(upper(public_body_translations.name) LIKE upper(?) 
-                            OR upper(public_body_translations.notes) LIKE upper (?)) 
+        locale_condition = "(upper(public_body_translations.name) LIKE upper(?)
+                            OR upper(public_body_translations.notes) LIKE upper (?))
                             AND public_body_translations.locale = ?
                             AND public_bodies.id <> #{PublicBody.internal_admin_body.id}"
         if @tag.nil? or @tag == "all"
@@ -149,14 +149,14 @@ class PublicBodyController < ApplicationController
     end
 
     def list_all_csv
-        public_bodies = PublicBody.find(:all, :order => 'url_name')
-        report = StringIO.new
-        CSV::Writer.generate(report, ',') do |title|
-            title << [
-                    'Name', 
+        public_bodies = PublicBody.find(:all, :order => 'url_name',
+                                              :include => [:translations, :tags])
+        report = FasterCSV.generate() do |csv|
+            csv << [
+                    'Name',
                     'Short name',
                     # deliberately not including 'Request email'
-                    'URL name', 
+                    'URL name',
                     'Tags',
                     'Home page',
                     'Publication scheme',
@@ -165,12 +165,12 @@ class PublicBodyController < ApplicationController
                     'Version',
             ]
             public_bodies.each do |public_body|
-                title << [ 
-                    public_body.name, 
-                    public_body.short_name, 
+                csv << [
+                    public_body.name,
+                    public_body.short_name,
                     # DO NOT include request_email (we don't want to make it
                     # easy to spam all authorities with requests)
-                    public_body.url_name, 
+                    public_body.url_name,
                     public_body.tag_string,
                     public_body.calculated_home_page,
                     public_body.publication_scheme,
@@ -180,9 +180,8 @@ class PublicBodyController < ApplicationController
                 ]
             end
         end
-        report.rewind
-        send_data(report.read, :type=> 'text/csv; charset=utf-8; header=present',
-                  :filename => 'all-authorities.csv', 
+        send_data(report, :type=> 'text/csv; charset=utf-8; header=present',
+                  :filename => 'all-authorities.csv',
                   :disposition =>'attachment', :encoding => 'utf8')
     end
 

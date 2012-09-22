@@ -23,3 +23,6 @@ TAGS
 config/alert-tracks-debian.ugly
 .project
 /commonlib/*
+bin/
+config/aliases
+.sass-cache

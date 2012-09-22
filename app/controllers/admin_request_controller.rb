@@ -6,6 +6,8 @@
 #
 # $Id: admin_request_controller.rb,v 1.42 2009-10-03 01:28:33 francis Exp $
 
+require 'ostruct'
+
 class AdminRequestController < AdminController
     def index
         list
@@ -14,16 +16,38 @@ class AdminRequestController < AdminController
 
     def list
         @query = params[:query]
-        @info_requests = InfoRequest.paginate :order => "created_at desc", :page => params[:page], :per_page => 100,
+        @info_requests = InfoRequest.paginate :order => "created_at desc",
+                                              :page => params[:page],
+                                              :per_page => 100,
             :conditions =>  @query.nil? ? nil : ["lower(title) like lower('%'||?||'%')", @query]
     end
 
     def list_old_unclassified
-        @info_requests = InfoRequest.find_old_unclassified(:conditions => ["prominence = 'normal'"])
+        @info_requests = WillPaginate::Collection.create((params[:page] or 1), 50) do |pager|
+            info_requests = InfoRequest.find_old_unclassified(:conditions => ["prominence = 'normal'"],
+                                                              :limit => pager.per_page,
+                                                              :offset => pager.offset)
+             # inject the result array into the paginated collection:
+             pager.replace(info_requests)
+
+             unless pager.total_entries
+               # the pager didn't manage to guess the total count, do it manually
+               pager.total_entries = InfoRequest.count_old_unclassified(:conditions => ["prominence = 'normal'"])
+             end
+         end
     end
 
     def show
         @info_request = InfoRequest.find(params[:id])
+        # XXX is this *really* the only way to render a template to a
+        # variable, rather than to the response?
+        vars = OpenStruct.new(:name_to => @info_request.user_name,
+                :name_from => MySociety::Config.get("CONTACT_NAME", 'Alaveteli'),
+                :info_request => @info_request, :reason => params[:reason],
+                :info_request_url => 'http://' + MySociety::Config.get('DOMAIN') + request_url(@info_request),
+                :site_name => site_name)
+        template = File.read(File.join(File.dirname(__FILE__), "..", "views", "admin_request", "hidden_user_explanation.rhtml"))
+        @request_hidden_user_explanation = ERB.new(template).result(vars.instance_eval { binding })
     end
 
     def resend
@@ -60,22 +84,24 @@ class AdminRequestController < AdminController
 
         if @info_request.valid?
             @info_request.save!
-            @info_request.log_event("edit", 
-                { :editor => admin_http_auth_user(), 
-                    :old_title => old_title, :title => @info_request.title, 
-                    :old_prominence => old_prominence, :prominence => @info_request.prominence, 
+            @info_request.log_event("edit",
+                { :editor => admin_http_auth_user(),
+                    :old_title => old_title, :title => @info_request.title,
+                    :old_prominence => old_prominence, :prominence => @info_request.prominence,
                     :old_described_state => old_described_state, :described_state => @info_request.described_state,
                     :old_awaiting_description => old_awaiting_description, :awaiting_description => @info_request.awaiting_description,
                     :old_allow_new_responses_from => old_allow_new_responses_from, :allow_new_responses_from => @info_request.allow_new_responses_from,
                     :old_handle_rejected_responses => old_handle_rejected_responses, :handle_rejected_responses => @info_request.handle_rejected_responses,
                     :old_tag_string => old_tag_string, :tag_string => @info_request.tag_string
                 })
+            # expire cached files
+            expire_for_request(@info_request)
             flash[:notice] = 'Request successfully updated.'
             redirect_to request_admin_url(@info_request)
         else
             render :action => 'edit'
         end
-    end 
+    end
 
     def fully_destroy
         @info_request = InfoRequest.find(params[:id])
@@ -84,7 +110,8 @@ class AdminRequestController < AdminController
         url_title = @info_request.url_title
 
         @info_request.fully_destroy
-
+        # expire cached files
+        expire_for_request(@info_request)
         flash[:notice] = "Request #{url_title} has been completely destroyed. Email of user who made request: " + user.email
         redirect_to admin_url('request/list')
     end
@@ -99,28 +126,28 @@ class AdminRequestController < AdminController
         outgoing_message_id = @outgoing_message.id
 
         @outgoing_message.fully_destroy
-        @outgoing_message.info_request.log_event("destroy_outgoing", 
+        @outgoing_message.info_request.log_event("destroy_outgoing",
             { :editor => admin_http_auth_user(), :deleted_outgoing_message_id => outgoing_message_id })
 
         flash[:notice] = 'Outgoing message successfully destroyed.'
         redirect_to request_admin_url(@info_request)
-    end 
+    end
 
     def update_outgoing
         @outgoing_message = OutgoingMessage.find(params[:id])
 
         old_body = @outgoing_message.body
 
-        if @outgoing_message.update_attributes(params[:outgoing_message]) 
-            @outgoing_message.info_request.log_event("edit_outgoing", 
-                { :outgoing_message_id => @outgoing_message.id, :editor => admin_http_auth_user(), 
+        if @outgoing_message.update_attributes(params[:outgoing_message])
+            @outgoing_message.info_request.log_event("edit_outgoing",
+                { :outgoing_message_id => @outgoing_message.id, :editor => admin_http_auth_user(),
                     :old_body => old_body, :body => @outgoing_message.body })
             flash[:notice] = 'Outgoing message successfully updated.'
             redirect_to request_admin_url(@outgoing_message.info_request)
         else
             render :action => 'edit_outgoing'
         end
-    end 
+    end
 
     def edit_comment
         @comment = Comment.find(params[:id])
@@ -133,9 +160,9 @@ class AdminRequestController < AdminController
         old_visible = @comment.visible
         @comment.visible = params[:comment][:visible] == "true" ? true : false
 
-        if @comment.update_attributes(params[:comment]) 
-            @comment.info_request.log_event("edit_comment", 
-                { :comment_id => @comment.id, :editor => admin_http_auth_user(), 
+        if @comment.update_attributes(params[:comment])
+            @comment.info_request.log_event("edit_comment",
+                { :comment_id => @comment.id, :editor => admin_http_auth_user(),
                     :old_body => old_body, :body => @comment.body,
                     :old_visible => old_visible, :visible => @comment.visible,
                 })
@@ -144,7 +171,7 @@ class AdminRequestController < AdminController
         else
             render :action => 'edit_comment'
         end
-    end 
+    end
 
 
     def destroy_incoming
@@ -153,41 +180,49 @@ class AdminRequestController < AdminController
         incoming_message_id = @incoming_message.id
 
         @incoming_message.fully_destroy
-        @incoming_message.info_request.log_event("destroy_incoming", 
+        @incoming_message.info_request.log_event("destroy_incoming",
             { :editor => admin_http_auth_user(), :deleted_incoming_message_id => incoming_message_id })
-
+        # expire cached files
+        expire_for_request(@info_request)
         flash[:notice] = 'Incoming message successfully destroyed.'
         redirect_to request_admin_url(@info_request)
-    end 
+    end
 
     def redeliver_incoming
         incoming_message = IncomingMessage.find(params[:redeliver_incoming_message_id])
+        message_ids = params[:url_title].split(",").each {|x| x.strip}
+        previous_request = incoming_message.info_request
+        destination_request = nil
+        ActiveRecord::Base.transaction do
+            for m in message_ids
+                if m.match(/^[0-9]+$/)
+                    destination_request = InfoRequest.find_by_id(m.to_i)
+                else
+                    destination_request = InfoRequest.find_by_url_title!(m)
+                end
+                if destination_request.nil?
+                    flash[:error] = "Failed to find destination request '" + m + "'"
+                    return redirect_to request_admin_url(previous_request)
+                end
 
-        if params[:url_title].match(/^[0-9]+$/)
-            destination_request = InfoRequest.find(params[:url_title].to_i)
-        else
-            destination_request = InfoRequest.find_by_url_title(params[:url_title])
+                raw_email_data = incoming_message.raw_email.data
+                mail = TMail::Mail.parse(raw_email_data)
+                mail.base64_decode
+                destination_request.receive(mail, raw_email_data, true)
+
+                incoming_message_id = incoming_message.id
+                incoming_message.info_request.log_event("redeliver_incoming", {
+                                                            :editor => admin_http_auth_user(),
+                                                            :destination_request => destination_request.id,
+                                                            :deleted_incoming_message_id => incoming_message_id
+                                                        })
+
+                flash[:notice] = "Message has been moved to request(s). Showing the last one:"
+            end
+            # expire cached files
+            expire_for_request(previous_request)
+            incoming_message.fully_destroy
         end
-
-        if destination_request.nil?
-            flash[:error] = "Failed to find destination request '" + params[:url_title] + "'"
-            redirect_to request_admin_url(incoming_message.info_request)
-        end
-
-        raw_email_data = incoming_message.raw_email.data
-        mail = TMail::Mail.parse(raw_email_data)
-        mail.base64_decode
-        destination_request.receive(mail, raw_email_data, true)
-
-        incoming_message_id = incoming_message.id
-        incoming_message.fully_destroy
-        incoming_message.info_request.log_event("redeliver_incoming", { 
-                :editor => admin_http_auth_user(), 
-                :destination_request => destination_request.id, 
-                :deleted_incoming_message_id => incoming_message_id 
-        })
-
-        flash[:notice] = "Message has been moved to this request"
         redirect_to request_admin_url(destination_request)
     end
 
@@ -202,10 +237,10 @@ class AdminRequestController < AdminController
             else
                 info_request.user = destination_user
                 info_request.save!
-                info_request.log_event("move_request", { 
-                        :editor => admin_http_auth_user(), 
-                        :old_user_url_name => old_user.url_name, 
-                        :user_url_name => destination_user.url_name 
+                info_request.log_event("move_request", {
+                        :editor => admin_http_auth_user(),
+                        :old_user_url_name => old_user.url_name,
+                        :user_url_name => destination_user.url_name
                 })
 
                 info_request.reindex_request_events
@@ -220,10 +255,10 @@ class AdminRequestController < AdminController
             else
                 info_request.public_body = destination_public_body
                 info_request.save!
-                info_request.log_event("move_request", { 
-                        :editor => admin_http_auth_user(), 
-                        :old_public_body_url_name => old_public_body.url_name, 
-                        :public_body_url_name => destination_public_body.url_name 
+                info_request.log_event("move_request", {
+                        :editor => admin_http_auth_user(),
+                        :old_public_body_url_name => old_public_body.url_name,
+                        :public_body_url_name => destination_public_body.url_name
                 })
 
                 info_request.reindex_request_events
@@ -288,16 +323,16 @@ class AdminRequestController < AdminController
             if domain.nil?
                 @public_bodies = []
             else
-                @public_bodies = PublicBody.find(:all, :order => "name", 
+                @public_bodies = PublicBody.find(:all, :order => "name",
                     :conditions => [ "lower(request_email) like lower('%'||?||'%')", domain ])
             end
-            
+
             # 2. Match the email address in the message without matching the hash
             @info_requests =  InfoRequest.guess_by_incoming_email(@raw_email.incoming_message)
 
             # 3. Give a reason why it's in the holding pen
             last_event = InfoRequestEvent.find_by_incoming_message_id(@raw_email.incoming_message.id)
-            @rejected_reason = last_event.params[:rejected_reason]
+            @rejected_reason = last_event.params[:rejected_reason] || "unknown reason"
         end
     end
 
@@ -321,6 +356,39 @@ class AdminRequestController < AdminController
 
         flash[:notice] = "Old response marked as having been a clarification"
         redirect_to request_admin_url(info_request_event.info_request)
+    end
+
+    def hide_request
+        ActiveRecord::Base.transaction do
+            subject = params[:subject]
+            explanation = params[:explanation]
+            info_request = InfoRequest.find(params[:id])
+            info_request.prominence = "requester_only"
+
+            info_request.log_event("hide", {
+                    :editor => admin_http_auth_user(),
+                    :reason => params[:reason],
+                    :subject => subject,
+                    :explanation => explanation
+            })
+
+            info_request.set_described_state(params[:reason])
+            info_request.save!
+
+            if ! info_request.is_external?
+                ContactMailer.deliver_from_admin_message(
+                        info_request.user,
+                        subject,
+                        params[:explanation]
+                    )
+                flash[:notice] = _("Your message to {{recipient_user_name}} has been sent",:recipient_user_name=>CGI.escapeHTML(info_request.user.name))
+            else
+                flash[:notice] = _("This external request has been hidden")
+            end
+            # expire cached files
+            expire_for_request(info_request)
+            redirect_to request_admin_url(info_request)
+        end
     end
 
     private

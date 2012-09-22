@@ -1,5 +1,5 @@
 # == Schema Information
-# Schema version: 108
+# Schema version: 114
 #
 # Table name: post_redirects
 #
@@ -64,7 +64,7 @@ class PostRedirect < ActiveRecord::Base
         MySociety::Util.generate_token
     end
 
-    # Make the token 
+    # Make the token
     def after_initialize
         # The token is used to return you to what you are doing after the login form.
         if not self.token

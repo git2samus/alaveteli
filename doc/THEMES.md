@@ -36,13 +36,30 @@ places:
 
 This document is about what you can do in a theme.
 
-To get started, install the sample theme by running 
+By default, the sample theme ("alavetelitheme") has already been 
+installed.  See the setting `THEME_URLS` in `general.yml` for an 
+explanation.
 
-    ./script/plugin install git://github.com/sebbacon/alavetelitheme.git
+You can also install the sample theme by hand, by running:
+
+    ./script/plugin install git://github.com/mysociety/alavetelitheme.git
     
-This downloads and installs the theme in
-`vendor/plugins/alavetelitheme` and contains examples for nearly
-everything you might want to customise.
+The sample theme contains examples for nearly everything you might 
+want to customise.  You should probably make a copy, rename it, and
+use that as the basis for your own theme.
+
+# Make sure your theme is as lightweight as possible
+
+The more you put in your theme, the harder it will be to upgrade to
+future versions of Alaveteli.  Everything you place in your theme
+overrides things in the core theme, so if you make a new "main
+template", then new widgets that appear in the core theme won't appear
+on your website.
+
+Therefore, you should consider how you can brand your website without
+changing much in the core theme.  The ideal would be if you are able
+to rebrand the site by only changing the CSS.  You will also need to
+add custom help pages, as described below.
 
 # Branding the site 
 
@@ -68,7 +85,7 @@ instead of the core "about us" file.
 Rails expects all its stylesheets to live at `<railshome>/public`,
 which presents a problem for plugins.  Here's how we solve it: the
 stylesheet and associated resources for your theme live (by
-convention) in at `alavetelitheme/public/`.  This is symlinked from
+convention) in `alavetelitheme/public/`.  This is symlinked from
 the main Rails app -- see `alavetelitheme/install.rb` to see how this
 happens.
 
@@ -95,7 +112,7 @@ locale you support.
 # Customising the request states
 
 As mentioned above, if you can possibly live with the
-[default Alaveteli request statuses](https://github.com/sebbacon/alaveteli/wiki/Alaveteli's-request-statuses),
+[default Alaveteli request statuses](https://github.com/mysociety/alaveteli/wiki/Alaveteli's-request-statuses),
 it would be good to do so.  Note that you can set how many days counts
 as "overdue" in the main site config file.
 

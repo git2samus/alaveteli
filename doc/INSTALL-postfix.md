@@ -6,6 +6,10 @@ In /etc/postfix/master.cf:
   alaveteli unix  -	n	n	-	50	pipe
     flags=R user=ALAVETELI_USER argv=ALAVETELI_HOME/script/mailin
 
+In /etc/postfix/main.cf
+
+  virtual_alias_maps = regexp:/etc/postfix/regexp
+
 For example
 
 ALAVETELI_HOME=/path/to/alaveteli/software
@@ -38,7 +42,7 @@ following to /etc/aliases:
 # Troubleshooting
 
 To test mail delivery, run:
-  
+
   $ /usr/sbin/sendmail -bv foi+requrest-1234@localhost
 
-This tells you if sending the emails to 'foi\+.*localhost' is working. 
+This tells you if sending the emails to 'foi\+.*localhost' is working.

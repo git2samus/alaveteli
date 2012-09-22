@@ -1,5 +1,7 @@
+# encoding: UTF-8
+
 # == Schema Information
-# Schema version: 108
+# Schema version: 114
 #
 # Table name: foi_attachments
 #
@@ -13,8 +15,6 @@
 #  incoming_message_id   :integer
 #  hexdigest             :string(32)
 #
-
-# encoding: UTF-8
 
 # models/foi_attachment.rb:
 # An attachment to an email (IncomingMessage)
@@ -42,7 +42,7 @@ class FoiAttachment < ActiveRecord::Base
         if rails_env.nil? || rails_env.empty?
             raise "$RAILS_ENV is not set"
         end
-        base_dir = File.join(File.dirname(__FILE__), "../../cache", "attachments_#{rails_env}")
+        base_dir = File.expand_path(File.join(File.dirname(__FILE__), "../../cache", "attachments_#{rails_env}"))
         return File.join(base_dir, self.hexdigest[0..2])
     end
 
@@ -177,7 +177,7 @@ class FoiAttachment < ActiveRecord::Base
         filename = filename.gsub(/\//, "-")
 
         return filename
-    end 
+    end
 
     # XXX changing this will break existing URLs, so have a care - maybe
     # make another old_display_filename see above
@@ -248,16 +248,16 @@ class FoiAttachment < ActiveRecord::Base
         return !! {
             "application/pdf" => true, # .pdf
             "image/tiff" => true, # .tiff
-            
+
             "application/vnd.ms-word" => true, # .doc
             "application/vnd.openxmlformats-officedocument.wordprocessingml.document" => true, # .docx
-            
+
             "application/vnd.ms-powerpoint" => true, # .ppt
             "application/vnd.openxmlformats-officedocument.presentationml.presentation" => true, # .pptx
-            
+
             "application/vnd.ms-excel" => true, # .xls
             "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" => true, # .xlsx
-            
+
         } [self.content_type]
     end
 
@@ -277,16 +277,16 @@ class FoiAttachment < ActiveRecord::Base
         return {
             "text/plain" => "Text file",
             'application/rtf' => "RTF file",
-            
+
             'application/pdf' => "PDF file",
             'image/tiff' => "TIFF image",
-            
+
             'application/vnd.ms-word' => "Word document",
             'application/vnd.openxmlformats-officedocument.wordprocessingml.document' => "Word document",
-            
+
             'application/vnd.ms-powerpoint' => "PowerPoint presentation",
             'application/vnd.openxmlformats-officedocument.presentationml.presentation' => "PowerPoint presentation",
-            
+
             'application/vnd.ms-excel' => "Excel spreadsheet",
             'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' => "Excel spreadsheet",
         }[self.content_type]
@@ -315,14 +315,21 @@ class FoiAttachment < ActiveRecord::Base
             tempfile.print self.body
             tempfile.flush
 
+            html = nil
             if self.content_type == 'application/pdf'
-                html = AlaveteliExternalCommand.run("pdftohtml", "-nodrm", "-zoom", "1.0", "-stdout", "-enc", "UTF-8", "-noframes", tempfile.path)
+                # We set a timeout here, because pdftohtml can spiral out of control
+                # on some PDF files and we don’t want to crash the whole server.
+                html = AlaveteliExternalCommand.run("pdftohtml", "-nodrm", "-zoom", "1.0", "-stdout", "-enc", "UTF-8", "-noframes", tempfile.path, :timeout => 30)
             elsif self.content_type == 'application/rtf'
-                html = AlaveteliExternalCommand.run("unrtf", "--html", tempfile.path)
-            elsif self.has_google_docs_viewer?
-                html = '' # force error and using Google docs viewer
-            else
-                raise "No HTML conversion available for type " + self.content_type
+                html = AlaveteliExternalCommand.run("unrtf", "--html", tempfile.path, :timeout => 120)
+            end
+            
+            if html.nil?
+                if self.has_google_docs_viewer?
+                    html = '' # force error and using Google docs viewer
+                else
+                    raise "No HTML conversion available for type " + self.content_type
+                end
             end
 
             tempfile.close
@@ -345,7 +352,7 @@ class FoiAttachment < ActiveRecord::Base
             if self.has_google_docs_viewer?
                 wrapper_id = "wrapper_google_embed"
                 ret = ret + "<iframe src='http://docs.google.com/viewer?url=<attachment-url-here>&embedded=true' width='100%' height='100%' style='border: none;'></iframe>";
-            else 
+            else
                 ret = ret + "<p>Sorry, we were unable to convert this file to HTML. Please use the download link at the top right.</p>"
             end
             ret = ret + "</body></html>"

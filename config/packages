@@ -8,8 +8,8 @@ rdoc
 irb
 wv
 poppler-utils
-pdftk (> 1.41+dfsg-1) | pdftk (< 1.41+dfsg-1) # that version has a non-functionining uncompress option
-gs-gpl
+pdftk (>> 1.41+dfsg-1) | pdftk (<< 1.41+dfsg-1) # that version has a non-functionining uncompress option
+ghostscript
 catdoc
 links
 elinks
@@ -32,4 +32,7 @@ libmagickwand-dev
 libpq-dev
 uuid-dev
 ruby1.8-dev
+rubygems
+rake
 build-essential
+bundler

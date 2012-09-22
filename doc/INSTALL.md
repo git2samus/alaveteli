@@ -1,12 +1,12 @@
 These instructions assume Debian Squeeze or Ubuntu 10.04 LTS.
-[Install instructions for OS X](https://github.com/sebbacon/alaveteli/wiki/OS-X-Quickstart)
+[Install instructions for OS X](https://github.com/mysociety/alaveteli/wiki/OS-X-Quickstart)
 are under development.  Debian Squeeze is the best supported
 deployment platform.
 
 Commands are intended to be run via the terminal or over ssh.
 
 As an aid to evaluation, there is an
-[Amazon AMI](https://github.com/sebbacon/alaveteli/wiki/Alaveteli-ec2-amix)
+[Amazon AMI](https://github.com/mysociety/alaveteli/wiki/Alaveteli-ec2-ami)
 with all these steps configured.  It is *not* production-ready.
 
 # Get Alaveteli
@@ -14,27 +14,27 @@ with all these steps configured.  It is *not* production-ready.
 To start with, you may need to install git, e.g. with `sudo apt-get
 install git-core`
 
-Next, get hold of the Alaveteli source code from github: 
+Next, get hold of the Alaveteli source code from github:
 
     git clone https://github.com/datauy/alaveteli.git
     cd alaveteli
 
-This will get the current stable release.  If you are a developer and want to
-add or try new features, you might want to swap to the development
-branch:
+This will get the development branch, which has the latest (possibly
+buggy) code. If you don't want to add or try new features, swap to the
+master branch (which always contains the latest stable release):
 
-    git checkout develop
+    git checkout master
 
 # If you want to use RVM then install it
 
     sh -s stable < <(curl -s https://raw.github.com/wayneeseguin/rvm/master/binscripts/rvm-installer)
     source ~/.bashrc
-  
+
 Check on requirements
 
     rvm requirements
 
-Install 1.8.7 
+Install 1.8.7
 
     rvm install 1.8.7-head --with-openssl-dir=/usr/local
 
@@ -45,13 +45,17 @@ used to parse documents, host the site, etc.  There are also packages
 that contain headers necessary to compile some of the gem dependencies
 in the next step.
 
-If you are running Debian, you can use specially compiled mysociety
-packages by adding the following to `/etc/apt/sources.list` and
-running `apt-get update`:
+If you are running Debian, add the following repositories to
+`/etc/apt/sources.list` and run `apt-get update`:
 
     deb http://debian.mysociety.org squeeze main
-    
-If you are not using RVM:
+    deb http://ftp.debian.org/debian/ testing main non-free contrib
+
+The repositories above allow us to install the packages
+`wkthmltopdf-static` and `bundler` using `apt`; so if you're running
+Ubuntu, you won't be able to use the above repositories, and you will
+need to comment out those two lines in `config/packages` before
+following the next step (and install bundler manually).
 
 Now install the packages that are listed in config/packages using apt-get
 e.g.:
@@ -60,10 +64,7 @@ e.g.:
 
 Some of the files also have a version number listed in config/packages
 - check that you have appropriate versions installed. Some also list
-"|" and offer a choice of packages.  If you've not set up the
-mySociety Debian source (e.g. if you're running Ubuntu), you should
-comment out `wkhtmltopdf-static` from `config/packages`, as it won't
-install.
+"|" and offer a choice of packages.
 
 If you are using RVM:
 
@@ -77,19 +78,21 @@ DUDAS: gs-gpl es un dummy package, porque instalarlo?
 
 # Install Ruby dependencies
 
-Install rubygems 1.6.1 (we're not using the Debian package because we
+Install rubygems 1.6.2 (we're not using the Debian package because we
 need an older version; see "Troubleshooting" below for an
 explanation):
 
     wget http://rubyforge.org/frs/download.php/74445/rubygems-1.6.2.tgz -O /tmp/rubygems-1.6.2.tgz
     tar zxvf /tmp/rubygems-1.6.2.tgz -C /tmp/
     sudo ruby1.8 /tmp/rubygems-1.6.2/setup.rb
- 
+
 To install Alaveteli's Ruby dependencies, we also need to install
-bundler:
+bundler.  In Debian, this is provided as a package (installed as part
+of the package install process above).  You could also install it as a
+gem:
 
     sudo gem1.8 install bundler
-    
+
 # Install mySociety libraries
 
 You will also want to install mySociety's common ruby libraries and the Rails
@@ -123,10 +126,10 @@ in certain edge conditions.  Until it's incorporated into an official
 release, you can either hope you don't encounter the bug (it ties up a
 rails process until you kill it) you'll need to patch it yourself or
 use the Debian package compiled by mySociety (see link in
-[issue 305](https://github.com/sebbacon/alaveteli/issues/305))
+[issue 305](https://github.com/mysociety/alaveteli/issues/305))
 
 
-# Configure Database 
+# Configure Database
 
 There has been a little work done in trying to make the code work with
 other databases (e.g. SQLite), but the currently supported database is
@@ -147,12 +150,12 @@ Make sure that the user specified in database.yml exists, and has full
 permissions on these databases. As they need the ability to turn off
 constraints whilst running the tests they also need to be a superuser.
 (See http://dev.rubyonrails.org/ticket/9981)
-  
+
 You can create a `foi` user from the command line, thus:
 
     # su - postgres
     $ createuser -s -P foi
-    
+
 And you can create a database thus:
 
     $ createdb -T template0 -E SQL_ASCII -O foi foi_production
@@ -165,7 +168,7 @@ data that may not be valid UTF (for example, data originating from
 various broken email clients that's not 8-bit clean), it's safer to be
 able to store *anything*, than reject data at runtime.
 
-# Configure email 
+# Configure email
 
 You will need to set up an email server (MTA) to send and receive
 emails.  Full configuration for an MTA is beyond the scope of this
@@ -234,7 +237,7 @@ probably don't want this in your development profile; the example
 
 In the 'alaveteli' directory, run:
 
-    ./script/rails-post-deploy 
+    ./script/rails-post-deploy
 
 (This will need execute privs so `chmod 755` if necessary.) This sets
 up directory structures, creates logs, installs/updates themes, runs
@@ -244,17 +247,6 @@ update.
 One of the things the script does is install dependencies (using
 `bundle install`).  Note that the first time you run it, part of the
 `bundle install` that compiles `xapian-full` takes a *long* time!
-
-On Debian, at least, the binaries installed by bundler are not put in
-the system `PATH`; therefore, in order to run `rake` (needed for
-deployments), you will need to do something like:
-
-    ln -s /usr/lib/ruby/gems/1.8/bin/rake /usr/local/bin/
-    
-Or (Debian):
-
-    ln -s /usr/lib/ruby/gems/1.8/bin/rake /usr/local/bin/
-
 
 If you want some dummy data to play with, you can try loading the
 fixtures that the test suite uses into your development database.  You
@@ -273,7 +265,7 @@ component so you should really try to get this working.
 
 Make sure everything looks OK:
 
-    rake spec
+    bundle exec rake spec
 
 If there are failures here, something has gone wrong with the
 preceding steps (see the next section for a common problem and
@@ -306,23 +298,26 @@ the site in action.
 
 # Administrator privileges
 
-By default, anyone can access the administrator pages without authentication.
-They are under the URL `/admin`.
+The administrative interface is at the URL `/admin`.
 
-At mySociety (originators of the Alaveteli software), they use a
-separate layer of HTTP basic authentication, proxied over HTTPS, to
-check who is allowed to use the administrator pages. You might like to
-do something similar.
+Only users with the `super` admin level can access the admin
+interface.  Users create their own accounts in the usual way, and then
+administrators can give them `super` privileges.
 
-Alternatively, update the code so that:
+There is an emergency user account which can be accessed via
+`/admin?emergency=1`, using the credentials `ADMIN_USERNAME` and
+`ADMIN_PASSWORD`, which are set in `general.yml`.  To bootstrap the
+first `super` level accounts, you will need to log in as the emergency
+user.
 
-* By default, admin pages use normal site authentication (checking user admin
-level 'super').
-* Create an option in `config/general` which lets us override that
-behaviour.
+Users with the superuser role also have extra privileges in the
+website frontend, such as being able to categorise any request, being
+able to view items that have been hidden from the search, and being
+presented with "admin" links next to individual requests and comments
+in the front end.
 
-And send us the patch!
-
+It is possible completely to override the administrator authentication
+by setting `SKIP_ADMIN_AUTH` to `true` in `general.yml`.
 
 # Cron jobs
 
@@ -345,11 +340,21 @@ like `!!(*= $this *)!!`.  The variables are:
 * `user`: the user that the software runs as
 * `site`: a string to identify your alaveteli instance
 
+There is a dumb python script at `script/make-crontab` which you can
+edit and run to do some basic substitution for you.
+
 One of the cron jobs refers to a script at
 `/etc/init.d/foi-alert-tracks`.  This is an init script, a copy of
 which lives in `config/alert-tracks-debian.ugly`.  As with the cron
 jobs above, replace the variables (and/or bits near the variables)
-with paths to your software.
+with paths to your software.  `config/purge-varnish-debian.ugly` is a
+similar init script, which is optional and not required if you choose
+not to run your site behind Varnish (see below).
+
+The cron jobs refer to a program `run-with-lockfile`. See
+[this issue](https://github.com/mysociety/alaveteli/issues/112) for a
+discussion of where to find this program, and how you might replace
+it.
 
 # Set up production web server
 
@@ -369,20 +374,48 @@ server behind an http accelerator like Varnish.  A sample varnish VCL
 is supplied in `../conf/varnish-alaveteli.vcl`.
 
 Some
-[production server best practice notes](https://github.com/sebbacon/alaveteli/wiki/Production-Server-Best-Practices)
+[production server best practice notes](https://github.com/mysociety/alaveteli/wiki/Production-Server-Best-Practices)
 are evolving on the wiki.
+
+# Upgrading Alaveteli
+
+The developer team policy is that the master branch in git should
+always contain the latest stable release.  Therefore, in production,
+you should usually have your software deployed from the master branch,
+and an upgrade can be simply `git pull`.
+
+Patch version increases (e.g. 1.2.3 -> 1.2.4) should not require any
+further action on your part.
+
+Minor version increases (e.g. 1.2.4 -> 1.3.0) will usually require
+further action.  You should read the `CHANGES.md` document to see
+what's changed since your last deployment, paying special attention to
+anything in the "Updgrading" sections.
+
+Any upgrade may include new translations strings, i.e. new or altered
+messages to the user that need translating to your locale.  You should
+visit Transifex and try to get your translation up to 100% on each new
+release.  Failure to do so means that any new words added to the
+Alaveteli source code will appear in your website in English by
+default.  If your translations didn't make it to the latest release,
+you will need to download the updated `app.po` for your locale from
+Transifex and save it in the `locales/` folder.
+
+You should always run the script `scripts/rails-post-deploy` after
+each deployment.  This runs any database migrations for you, plus
+various other things that can be automated for deployment.
 
 # Troubleshooting
 
 *   **Incoming emails aren't appearing in my Alaveteli install**
-    
+
     First, you need to check that your MTA is delivering relevant
     incoming emails to the `script/mailin` command.  There are various
     ways of setting your MTA up to do this; we have documented one way
     of doing it in Exim at `doc/INSTALL-exim4.conf`, including a
     command you can use to check that the email routing is set up
     correctly.
-    
+
     Second, you need to test that the mailin script itself is working
     correctly, by running it from the command line, First, find a
     valid "To" address for a request in your system.  You can do this
@@ -393,7 +426,7 @@ are evolving on the wiki.
         Loading development environment (Rails 2.3.14)
         >> InfoRequest.find_by_url_title("why_do_you_have_such_a_fancy_dog").incoming_email
         => "request-101-50929748@localhost"
-            
+
     Now take the source of a valid email (there are some sample emails in
     `spec/fixtures/files/`); edit the `To:` header to match this address;
     and then pipe it through the mailin script.  A non-zero exit code
@@ -409,7 +442,7 @@ are evolving on the wiki.
     `CONTACT_EMAIL` (from your `general.yml` file).  A common problem is
     for the user that the MTA runs as not to have write access to
     `files/raw_emails/`.
-        
+
 *   **Various tests fail with "*Your PostgreSQL connection does not support
     unescape_bytea. Try upgrading to pg 0.9.0 or later.*"**
 
@@ -432,17 +465,17 @@ are evolving on the wiki.
     Normally, the encoding should just work, but under some
     circumstances it appears that `elinks` ignores the parameters
     passed to it from Alaveteli.
-    
+
     To force `elinks` always to treat input as UTF8, add the following
     to `/etc/elinks/elinks.conf`:
-    
+
         set document.codepage.assume = "utf-8"
         set document.codepage.force_assumed = 1
 
-    You should also check that your locale is set up correctly.  See 
-    [https://github.com/sebbacon/alaveteli/issues/128#issuecomment-1814845](this issue followup)
+    You should also check that your locale is set up correctly.  See
+    [https://github.com/mysociety/alaveteli/issues/128#issuecomment-1814845](this issue followup)
     for further discussion.
-    
+
 *   **I'm getting lots of `SourceIndex.new(hash) is deprecated` errors when running the tests**
 
     The latest versions of rubygems contain a large number of noisy
@@ -450,9 +483,19 @@ are evolving on the wiki.
     2.x isn't under active development so isn't going to get fixed (in
     the sense of using a non-deprecated API).  So the only vaguely
     sensible way to avoid this noisy output is to downgrade rubygems.
-    
+
     For example, you might do this by uninstalling your
     system-packaged rubygems, and then installing the latest rubygems
     from source, and finally executing `sudo gem update --system
     1.6.2`.
+
+*   **I'm seeing `rake: command not found` when running the post install script
+
+    The script uses `rake`.
+
+    It may be that the binaries installed by bundler are not put in the
+    system `PATH`; therefore, in order to run `rake` (needed for
+    deployments), you may need to do something like:
+
+        ln -s /usr/lib/ruby/gems/1.8/bin/rake /usr/local/bin/
 

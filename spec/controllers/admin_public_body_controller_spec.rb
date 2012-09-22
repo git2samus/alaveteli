@@ -4,10 +4,6 @@ describe AdminPublicBodyController, "when administering public bodies" do
     integrate_views
 
     before do
-        username = MySociety::Config.get('ADMIN_USERNAME', '')
-        password = MySociety::Config.get('ADMIN_PASSWORD', '')
-        basic_auth_login @request
-        
         @old_filters = ActionController::Routing::Routes.filters
         ActionController::Routing::Routes.filters = RoutingFilter::Chain.new
     end
@@ -54,7 +50,7 @@ describe AdminPublicBodyController, "when administering public bodies" do
         response.should redirect_to(:controller=>'admin_public_body', :action=>'show', :id => id)
         PublicBody.count.should == n
     end
-    
+
     it "destroys a public body" do
         n = PublicBody.count
         post :destroy, { :id => public_bodies(:forlorn_public_body).id }
@@ -74,25 +70,115 @@ describe AdminPublicBodyController, "when administering public bodies" do
         response.should redirect_to(:action=>'list')
         PublicBody.find_by_tag("department").count.should == n
     end
+
+    describe 'import_csv' do
+
+        describe 'when handling a GET request' do
+
+            it 'should get the page successfully' do
+                get :import_csv
+                response.should be_success
+            end
+
+        end
+
+        describe 'when handling a POST request' do
+
+            before do
+                PublicBody.stub!(:import_csv).and_return([[],[]])
+                @file_object = mock("a file upload", :read => 'some contents',
+                                                     :original_filename => 'contents.txt')
+            end
+
+            it 'should handle a nil csv file param' do
+                post :import_csv, { :commit => 'Dry run' }
+                response.should be_success
+            end
+
+            describe 'if there is a csv file param' do
+
+                it 'should try to get the contents and original name of a csv file param' do
+                    @file_object.should_receive(:read).and_return('some contents')
+                    post :import_csv, { :csv_file => @file_object,
+                                        :commit => 'Dry run'}
+                end
+
+                it 'should assign the original filename to the view' do
+                    post :import_csv, { :csv_file => @file_object,
+                                        :commit => 'Dry run'}
+                    assigns[:original_csv_file].should == 'contents.txt'
+                end
+
+            end
+
+            describe 'if there is no csv file param, but there are temporary_csv_file and
+                      original_csv_file params' do
+
+                it 'should try and get the file contents from a temporary file whose name
+                    is passed as a param' do
+                    @controller.should_receive(:retrieve_csv_data).with('csv_upload-2046-12-31-394')
+                    post :import_csv, { :temporary_csv_file => 'csv_upload-2046-12-31-394',
+                                        :original_csv_file => 'original_contents.txt',
+                                        :commit => 'Dry run'}
+                end
+
+                it 'should raise an error on an invalid temp file name' do
+                    params = { :temporary_csv_file => 'bad_name',
+                               :original_csv_file => 'original_contents.txt',
+                               :commit => 'Dry run'}
+                    expected_error = "Invalid filename in upload_csv: bad_name"
+                    lambda{ post :import_csv, params }.should raise_error(expected_error)
+                end
+
+                it 'should raise an error if the temp file does not exist' do
+                    temp_name = "csv_upload-20461231-394"
+                    params = { :temporary_csv_file => temp_name,
+                               :original_csv_file => 'original_contents.txt',
+                               :commit => 'Dry run'}
+                    expected_error = "Missing file in upload_csv: csv_upload-20461231-394"
+                    lambda{ post :import_csv, params }.should raise_error(expected_error)
+                end
+
+                it 'should assign the temporary filename to the view' do
+                    post :import_csv, { :csv_file => @file_object,
+                                        :commit => 'Dry run'}
+                    temporary_filename = assigns[:temporary_csv_file]
+                    temporary_filename.should match(/csv_upload-#{Time.now.strftime("%Y%m%d")}-\d{1,5}/)
+                end
+
+            end
+
+        end
+    end
 end
 
 describe AdminPublicBodyController, "when administering public bodies and paying attention to authentication" do
 
     integrate_views
 
+    before do
+        config = MySociety::Config.load_default()
+        config['SKIP_ADMIN_AUTH'] = false
+        basic_auth_login @request
+    end
+    after do
+        config = MySociety::Config.load_default()
+        config['SKIP_ADMIN_AUTH'] = true
+    end
+
+
     it "disallows non-authenticated users to do anything" do
         @request.env["HTTP_AUTHORIZATION"] = ""
         n = PublicBody.count
         post :destroy, { :id => 3 }
-        response.code.should == "401"
+        response.should redirect_to(:controller=>'user', :action=>'signin', :token=>PostRedirect.get_last_post_redirect.token)
         PublicBody.count.should == n
         session[:using_admin].should == nil
     end
 
-    it "skips admin authorisation when no username/password set" do
+    it "skips admin authorisation when SKIP_ADMIN_AUTH set" do
         config = MySociety::Config.load_default()
-        config['ADMIN_USERNAME'] = ''
-        config['ADMIN_PASSWORD'] = ''
+        config['SKIP_ADMIN_AUTH'] = true
         @request.env["HTTP_AUTHORIZATION"] = ""
 
         n = PublicBody.count
@@ -100,43 +186,59 @@ describe AdminPublicBodyController, "when administering public bodies and paying
         PublicBody.count.should == n - 1
         session[:using_admin].should == 1
     end
-    
-    it "skips admin authorisation when no username set" do
+
+    it "doesn't let people with bad credentials log in" do
         config = MySociety::Config.load_default()
-        config['ADMIN_USERNAME'] = ''
-        config['ADMIN_PASSWORD'] = 'fuz'
-        @request.env["HTTP_AUTHORIZATION"] = ""
-        
-        n = PublicBody.count
-        post :destroy, { :id => public_bodies(:forlorn_public_body).id }
-        PublicBody.count.should == n - 1
-        session[:using_admin].should == 1
-    end
-    it "forces authorisation when password and username set" do
-        config = MySociety::Config.load_default()
+        config['SKIP_ADMIN_AUTH'] = false
         config['ADMIN_USERNAME'] = 'biz'
         config['ADMIN_PASSWORD'] = 'fuz'
         @request.env["HTTP_AUTHORIZATION"] = ""
         n = PublicBody.count
         basic_auth_login(@request, "baduser", "badpassword")
         post :destroy, { :id => public_bodies(:forlorn_public_body).id }
-        response.code.should == "401"
+        response.should redirect_to(:controller=>'user', :action=>'signin', :token=>PostRedirect.get_last_post_redirect.token)
         PublicBody.count.should == n
         session[:using_admin].should == nil
     end
 
+    it "allows people with good credentials log in using HTTP Basic Auth" do
+        config = MySociety::Config.load_default()
+        config['SKIP_ADMIN_AUTH'] = false
+        config['ADMIN_USERNAME'] = 'biz'
+        config['ADMIN_PASSWORD'] = 'fuz'
+        @request.env["HTTP_AUTHORIZATION"] = ""
+        n = PublicBody.count
+        basic_auth_login(@request, "biz", "fuz")
+        post :show, { :id => public_bodies(:humpadink_public_body).id, :emergency => 1}
+        session[:using_admin].should == 1
+        n = PublicBody.count
+        post :destroy, { :id => public_bodies(:forlorn_public_body).id }
+        session[:using_admin].should == 1
+        PublicBody.count.should == n - 1
+    end
 
+    it "allows superusers to do stuff" do
+        session[:user_id] = users(:admin_user).id
+        @request.env["HTTP_AUTHORIZATION"] = ""
+        n = PublicBody.count
+        post :destroy, { :id => public_bodies(:forlorn_public_body).id }
+        PublicBody.count.should == n - 1
+        session[:using_admin].should == 1
+    end
 
+    it "doesn't allow non-superusers to do stuff" do
+        session[:user_id] = users(:robin_user).id
+        @request.env["HTTP_AUTHORIZATION"] = ""
+        n = PublicBody.count
+        post :destroy, { :id => public_bodies(:forlorn_public_body).id }
+        response.should redirect_to(:controller=>'user', :action=>'signin', :token=>PostRedirect.get_last_post_redirect.token)
+        PublicBody.count.should == n
+        session[:using_admin].should == nil
+    end
 end
 
 describe AdminPublicBodyController, "when administering public bodies with i18n" do
     integrate_views
-  
-    before do
-        username = MySociety::Config.get('ADMIN_USERNAME', '')
-        password = MySociety::Config.get('ADMIN_PASSWORD', '')
-        basic_auth_login @request
-    end
 
     it "shows the index page" do
         get :index
@@ -153,7 +255,7 @@ describe AdminPublicBodyController, "when administering public bodies with i18n"
 
     it "edits a public body" do
         get :edit, {:id => 3, :locale => :en}
-        
+
         # When editing a body, the controller returns all available translations
         assigns[:public_body].translation("es").name.should == 'El Department for Humpadinking'
         assigns[:public_body].name.should == 'Department for Humpadinking'
@@ -164,20 +266,20 @@ describe AdminPublicBodyController, "when administering public bodies with i18n"
         PublicBody.with_locale(:es) do
             pb = PublicBody.find(id=3)
             pb.name.should == "El Department for Humpadinking"
-            post :update, { 
-                :id => 3, 
-                :public_body => { 
-                    :name => "Department for Humpadinking", 
-                    :short_name => "", 
-                    :tag_string => "some tags", 
-                    :request_email => 'edited@localhost', 
+            post :update, {
+                :id => 3,
+                :public_body => {
+                    :name => "Department for Humpadinking",
+                    :short_name => "",
+                    :tag_string => "some tags",
+                    :request_email => 'edited@localhost',
                     :last_edit_comment => 'From test code',
                     :translated_versions => {
                         3 => {:locale => "es", :name => "Renamed",:short_name => "", :request_email => 'edited@localhost'}
                         }
                     }
                 }
-            response.flash[:notice].should include('successful') 
+            response.flash[:notice].should include('successful')
         end
 
         pb = PublicBody.find(public_bodies(:humpadink_public_body).id)
@@ -199,12 +301,8 @@ end
 
 describe AdminPublicBodyController, "when creating public bodies with i18n" do
     integrate_views
-  
+
     before do
-        username = MySociety::Config.get('ADMIN_USERNAME', '')
-        password = MySociety::Config.get('ADMIN_PASSWORD', '')
-        basic_auth_login @request
-        
         @old_filters = ActionController::Routing::Routes.filters
         ActionController::Routing::Routes.filters = RoutingFilter::Chain.new
     end
@@ -224,14 +322,14 @@ describe AdminPublicBodyController, "when creating public bodies with i18n" do
 
     it "creates a new public body with multiple locales" do
         n = PublicBody.count
-        post :create, { 
-            :public_body => { 
+        post :create, {
+            :public_body => {
                 :name => "New Quango", :short_name => "", :tag_string => "blah", :request_email => 'newquango@localhost', :last_edit_comment => 'From test code',
                 :translated_versions => [{ :locale => "es", :name => "Mi Nuevo Quango", :short_name => "", :request_email => 'newquango@localhost' }]
                 }
         }
         PublicBody.count.should == n + 1
-        
+
         body = PublicBody.find_by_name("New Quango")
         body.translations.map {|t| t.locale.to_s}.sort.should == ["en", "es"]
         PublicBody.with_locale(:en) do
@@ -244,7 +342,7 @@ describe AdminPublicBodyController, "when creating public bodies with i18n" do
             body.url_name.should == "mi_nuevo_quango"
             body.first_letter.should == "M"
         end
-        
+
         response.should redirect_to(:controller=>'admin_public_body', :action=>'show', :id=>body.id)
     end
 end
