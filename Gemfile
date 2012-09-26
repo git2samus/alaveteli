@@ -1,11 +1,11 @@
 # Work around bug in Debian Squeeze - see https://github.com/sebbacon/alaveteli/pull/297#issuecomment-4101012
 if File.exist? "/etc/debian_version"
   DEBIAN_VERSION = File.open("/etc/debian_version").read.strip
-end
-if  DEBIAN_VERSION == "6.0.4" || DEBIAN_VERSION == "squeeze/sid"
-  if File.exist? "/lib/libuuid.so.1"
-    require 'dl'
-    DL::dlopen('/lib/libuuid.so.1')
+  if  DEBIAN_VERSION == "6.0.4" || DEBIAN_VERSION == "squeeze/sid"
+    if File.exist? "/lib/libuuid.so.1"
+      require 'dl'
+      DL::dlopen('/lib/libuuid.so.1')
+    end
   end
 end
 source :rubygems
