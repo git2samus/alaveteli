@@ -1,7 +1,7 @@
 # SOME DESCRIPTIVE TITLE.
 # Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
 # This file is distributed under the same license as the PACKAGE package.
-# 
+#
 # Translators:
 # David Cabo <david.cabo@gmail.com>, 2011, 2012.
 # skenaja <alex@alexskene.com>, 2011.
@@ -1750,7 +1750,7 @@ msgstr "Mi solicitud ha sido <strong>rechazada</strong>"
 
 #: app/views/layouts/default.rhtml:105
 msgid "My requests"
-msgstr "Mis solicitudes."
+msgstr "Mis solicitudes"
 
 #: app/models/public_body.rb:36
 msgid "Name can't be blank"
