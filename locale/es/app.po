@@ -159,11 +159,11 @@ msgstr[1] "%d solicitudes enviadas."
 
 #: app/views/request/new.rhtml:92
 msgid "'Crime statistics by ward level for Wales'"
-msgstr "'Estadísticas de crímenes por región en España'"
+msgstr "'Estadísticas de crímenes por ciudad en Uruguay'"
 
 #: app/views/request/new.rhtml:90
 msgid "'Pollution levels over time for the River Tyne'"
-msgstr "'Niveles históricos de contaminación en el río Ebro'"
+msgstr "'Niveles históricos de contaminación en el arroyo Miguelete'"
 
 #: app/models/track_thing.rb:245
 msgid "'{{link_to_authority}}', a public authority"
@@ -936,6 +936,25 @@ msgstr "Fecha:"
 msgid "Dear {{public_body_name}},"
 msgstr "Estimado {{public_body_name}},"
 
+#: app/models/outgoing_message.rb:89
+msgid "default_request_letter"
+msgstr "De mi mayor  consideración:\n\n\n"
+       "Me dirijo a esta Oficina a los efectos de realizar la siguiente peticion:\n\n"
+       "La ley 18.381 establece en su artículo 3 el derecho -sin necesidad de
+       justificación alguna- de cualquier persona física o jurídica a acceder a
+       información en poder de los organismos públicos, estatales o no estatales.
+       Asimismo, en sus artículos 13 y siguientes establece un procedimiento
+       preciso por el cual la administración se encuentra obligada a entregarme la
+       información requerida en el palazo de 20 días hábiles.\n\n"
+       "En este marco, solicito a usted me haga entrega de la siguiente información
+       en formato electronico\n"
+       "\n\n\n\n<REDACTE EL PEDIDO ACA>\n\n\n\n"
+       " En virtud de lo expuesto, y de acuerdo de lo dictado en la normativa
+       citada, PIDO: Se entregue por la dirección a su cargo, en el plazo
+       establecido por el artículo 15 de la Ley 18. l381 la información requerida
+       en el presente escrito."
+
+
 #: app/models/request_mailer.rb:87
 msgid "Delayed response to your FOI request - "
 msgstr "Respuesta retrasada a tu solicitud de acceso a información - "
@@ -1069,7 +1088,7 @@ msgid ""
 "Everything that you enter on this page \n"
 "                will be <strong>displayed publicly</strong> on\n"
 "                this website forever (<a href=\"%s\">why?</a>)."
-msgstr "Todo lo que escriba en esta página \n                estará <strong>disponible públicamente</strong> en\n                está web para siempre (<a href=\"%s\">¿por qué?</a>)."
+msgstr "Todo lo que escriba en esta página (incluso su nombre) \n                estará <strong>disponible públicamente</strong> en\n                está web para siempre (<a href=\"%s\">¿por qué?</a>)."
 
 #: app/views/request/new.rhtml:120
 msgid ""
@@ -4023,7 +4042,7 @@ msgstr "Su solicitud se llamaba {{info_request}}. Háganos saber si ha recibido 
 
 #: app/views/request/new.rhtml:113
 msgid "Your request:"
-msgstr "Su solicitud:"
+msgstr "Su pedido:"
 
 #: app/views/request/upload_response.rhtml:8
 msgid ""
