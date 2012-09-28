@@ -84,12 +84,15 @@ after "deploy:migrate", "deploy:update_theme"
 after "deploy:create_symlink", "deploy:site_links"
 after "deploy:site_links", "deploy:update_permissions"
 
+####################
+#    Passenger     #
+####################
 
-# If you are using Passenger mod_rails uncomment this:
-# namespace :deploy do
-#   task :start do ; end
-#   task :stop do ; end
-#   task :restart, :roles => :app, :except => { :no_release => true } do
-#     run "#{try_sudo} touch #{File.join(current_path,'tmp','restart.txt')}"
-#   end
-# end
+namespace :passenger do
+  desc "Reinicia la aplicacion"
+  task :restart, :roles => :app, :except => { :no_release => true } do
+    run "cd #{release_path} && sudo touch #{release_path}/tmp/restart.txt"
+  end
+end
+
+after :deploy, "passenger:restart"
