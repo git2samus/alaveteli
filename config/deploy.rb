@@ -91,8 +91,6 @@ after "deploy:site_links", "deploy:update_permissions"
 namespace :passenger do
   desc "Reinicia la aplicacion"
   task :restart, :roles => :app, :except => { :no_release => true } do
-    run "cd #{release_path} && sudo touch #{release_path}/tmp/restart.txt"
+    run "sudo touch /var/www/quesabes/tmp/restart.txt"
   end
 end
-
-after :deploy, "passenger:restart"
