@@ -3414,7 +3414,7 @@ msgstr "TrackThing|Track type"
 
 #: app/views/request/_sidebar.rhtml:13
 msgid "Tweet this request"
-msgstr "Tuitear esta solicitud"
+msgstr "Twitear esta solicitud"
 
 #: app/views/general/_advanced_search_tips.rhtml:15
 msgid ""
