@@ -447,16 +447,7 @@ class RequestController < ApplicationController
             flash[:notice] = _("<p>Thank you! Your request is long overdue, by more than {{very_late_number_of_days}} working days. Most requests should be answered within {{late_number_of_days}} working days. You might like to complain about this, see below.</p>", :very_late_number_of_days => MySociety::Config.get('REPLY_VERY_LATE_AFTER_DAYS', 40), :late_number_of_days => MySociety::Config.get('REPLY_LATE_AFTER_DAYS', 20))
             redirect_to unhappy_url(@info_request)
         elsif @info_request.calculate_status == 'not_held'
-            flash[:notice] = _("<p>Thank you! Here are some ideas on what to do next:</p>
-            <ul>
-            <li>To send your request to another authority, first copy the text of your request below, then <a href=\"{{find_authority_url}}\">find the other authority</a>.</li>
-            <li>If you would like to contest the authority's claim that they do not hold the information, here is
-            <a href=\"{{complain_url}}\">how to complain</a>.
-            </li>
-            <li>We have <a href=\"{{other_means_url}}\">suggestions</a>
-            on other means to answer your question.
-            </li>
-            </ul>",
+            flash[:notice] = _("<p>Thank you! Here are some ideas on what to do next:</p><ul><li>To send your request to another authority, first copy the text of your request below, then <a href=\"{{find_authority_url}}\">find the other authority</a>.</li><li>If you would like to contest the authority's claim that they do not hold the information, here is <a href=\"{{complain_url}}\">how to complain</a>.</li><li>We have <a href=\"{{other_means_url}}\">suggestions</a> on other means to answer your question.</li></ul>",
             :find_authority_url => "/new",
             :complain_url => CGI.escapeHTML(unhappy_url(@info_request)),
             :other_means_url => CGI.escapeHTML(unhappy_url(@info_request)) + "#other_means")
