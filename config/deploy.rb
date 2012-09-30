@@ -48,22 +48,26 @@ namespace :deploy do
     "#{shared_path}/system/config/rails_env.rb" => "#{release_path}/config/rails_env.rb",
     "#{shared_path}/system/xapiandbs" => "#{release_path}/vendor/plugins/acts_as_xapian/xapiandbs",
     "#{shared_path}/system/files" => "#{release_path}/files",
-    "#{shared_path}/cache" => "#{release_path}/cache"
-    # "#{release_path}/public/download" => "#{release_path}/cache/zips/download"
+    "#{shared_path}/cache" => "#{release_path}/cache",
+    "#{shared_path}/cache/zips/download" => "#{release_path}/public/download"
     }
 
     # "ln -sf <a> <b>" creates a symbolic link but deletes <b> if it already exists
     run links.map {|a| "ln -sf #{a.first} #{a.last}"}.join(";")
   end
-  
+
   task :update_permissions do
       run "sudo chown -R www-data:deploy #{shared_path}"
       run "sudo chown -R www-data:deploy #{release_path}"
       run "sudo chmod -R ug+rw #{release_path}"
   end
 
+  task :update_commonlibs do
+
+  end
+
   task :update_theme do
-      run "cd #{release_path} && sudo #{release_path}/script/plugin install 'git://github.com/sebbacon/adminbootstraptheme.git'"
+      run "cd #{release_path} && sudo #{release_path}/script/plugin install 'git://github.com/mysociety/adminbootstraptheme.git'"
       run "cd #{release_path} && sudo #{release_path}/script/plugin install 'git://github.com/datauy/quesabes-theme.git'"
   end
 
@@ -80,12 +84,13 @@ after "deploy:migrate", "deploy:update_theme"
 after "deploy:create_symlink", "deploy:site_links"
 after "deploy:site_links", "deploy:update_permissions"
 
+####################
+#    Passenger     #
+####################
 
-# If you are using Passenger mod_rails uncomment this:
-# namespace :deploy do
-#   task :start do ; end
-#   task :stop do ; end
-#   task :restart, :roles => :app, :except => { :no_release => true } do
-#     run "#{try_sudo} touch #{File.join(current_path,'tmp','restart.txt')}"
-#   end
-# end
+namespace :passenger do
+  desc "Reinicia la aplicacion"
+  task :restart, :roles => :app, :except => { :no_release => true } do
+    run "sudo touch /var/www/quesabes/tmp/restart.txt"
+  end
+end

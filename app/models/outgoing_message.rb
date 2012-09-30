@@ -70,9 +70,11 @@ class OutgoingMessage < ActiveRecord::Base
             return _("Yours faithfully,")
         end
     end
+
     def get_internal_review_insert_here_note
         return _("GIVE DETAILS ABOUT YOUR COMPLAINT HERE")
     end
+
     def get_default_letter
         if self.default_letter
             return self.default_letter
@@ -84,12 +86,14 @@ class OutgoingMessage < ActiveRecord::Base
             "Una historia de mi pedido puede ser encontrada en el siguiente enlace:\n" +
             "http://" + MySociety::Config.get("DOMAIN", '127.0.0.1:3000') + "/request/" + self.info_request.url_title
         else
-            ""
+            _("default_request_letter")
         end
     end
+
     def get_default_message
         get_salutation + "\n\n" + get_default_letter + "\n\n" + get_signoff + "\n\n"
     end
+
     def set_signature_name(name)
         # XXX We use raw_body here to get unstripped one
         if self.raw_body == self.get_default_message
