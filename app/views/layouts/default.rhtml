@@ -1,22 +1,25 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
-<html lang="<%= I18n.locale %>">
+<!DOCTYPE html>
+<html lang="<%= I18n.locale %>" prefix="og: http://ogp.me/ns#">
     <head>
-        <title>
         <% if @title %>
-            <%=@title%> - <%= site_name %>
+        <title><%=@title%> - <%= site_name %></title>
+        <meta property="og:title" content="<%=@title%> - <%= site_name %>" />
         <% else %>
-            <%= site_name %> - <%= _('Make and browse Freedom of Information (FOI) requests') %>
+        <title><%= site_name %> - <%= _('Make and browse Freedom of Information (FOI) requests') %></title>
+        <meta property="og:title" content="<%= site_name %> - <%= _('Make and browse Freedom of Information (FOI) requests') %>" />
         <% end %>
-        </title>
 
-        <link rel="shortcut icon" href="/favicon.ico">
+        <meta property="og:type" content="website" />
+        <meta property="og:image" content="http://www.quesabes.org/quesabes-theme/images/logo_cuadrado.png" />
+
+        <link rel="shortcut icon" href="/quesabes-theme/images/favicon.gif">
         <%= stylesheet_link_tag 'main', :title => "Main", :rel => "stylesheet", :media => "all" %>
         <%= stylesheet_link_tag 'fonts', :rel => "stylesheet", :media => "all"  %>
         <%= stylesheet_link_tag 'print', :rel => "stylesheet", :media => "print"  %>
         <% if !params[:print_stylesheet].nil? %>
          <%= stylesheet_link_tag 'print', :rel => "stylesheet", :media => "all"  %>
         <% end %>
-        <%= javascript_include_tag 'jquery.js', 'jquery-ui.min','jquery.cookie.js', 'general.js' %>
+        <%= javascript_include_tag 'jquery.js', 'jquery-ui.min','jquery.cookie.js' %>
 
         <% if @profile_photo_javascript %>
             <script type="text/javascript" src="/javascripts/jquery.Jcrop.js"></script>
@@ -25,20 +28,16 @@
         <% end %>
 
         <%= stylesheet_link_tag 'admin-theme/jquery-ui-1.8.15.custom.css', :rel => 'stylesheet'%>
-        <!--[if LT IE 7]> 
-        <style type="text/css">@import url("/stylesheets/ie6.css");</style> 
+        <!--[if LT IE 7]>
+        <style type="text/css">@import url("/stylesheets/ie6.css");</style>
         <![endif]-->
-        <!--[if LT IE 7]> 
-        <style type="text/css">@import url("/stylesheets/ie6-custom.css");</style> 
+        <!--[if LT IE 7]>
+        <style type="text/css">@import url("/stylesheets/ie6-custom.css");</style>
         <![endif]-->
-        <!--[if LT IE 8]> 
-        <style type="text/css">@import url("/stylesheets/ie7.css");</style> 
+        <!--[if LT IE 8]>
+        <style type="text/css">@import url("/stylesheets/ie7.css");</style>
         <![endif]-->
-        <!-- the following method for customising CSS is deprecated; see `doc/THEMES.md` for detail -->
-        <%= stylesheet_link_tag 'custom', :title => "Main", :rel => "stylesheet"  %>
-        <% if force_registration_on_new_request %>
-        <%= stylesheet_link_tag 'jquery.fancybox-1.3.4', :rel => "stylesheet"  %>
-        <% end %>
+
 
         <% if @feed_autodetect %>
             <% for feed in @feed_autodetect %>
@@ -60,44 +59,27 @@
     </head>
     <body <%= "class='front'" if params[:action] == 'frontpage' %>>
 
-    <!-- XXX: move to a separate file -->
-    <% if force_registration_on_new_request && !@user %>
-    <%= javascript_include_tag 'jquery.fancybox-1.3.4.pack' %>
-    <script type="text/javascript">
-        $(document).ready(function() {
-            $("#make-request-link").fancybox({
-                'modal': false,
-                'width': 920,
-                'height': 400,
-                'type': 'iframe',
-                'href': '/<%= I18n.locale %>/profile/sign_in?modal=1',
-                'onClosed': function() {
-                    // modal_signin_successful variable set by modal dialog box
-                    if (typeof modal_signin_successful != 'undefined' ) {
-                        window.location.href = '<%= select_authority_url %>';
-                    }
-                } 
-            });
-        });
-    </script>
-    <% end %>
-        
-<% # code for popup advert for a campaign etc.
-=begin
+
     <div id="everypage" class="jshide">
-    <p style="float:right"><a href="#top" onclick="$.cookie('seen_foi2', 1, { expires: 7, path: '/' }); $('#everypage').hide('slow'); return false;">Close</a></p>
-    [ message goes here ]
-    <p style="text-align: right"><a href="#top" onclick="$.cookie('seen_foi2', 1, { expires: 7, path: '/' }); $('#everypage').hide('slow'); return false;">Close</a></p>
+    Estamos trabajando. El registro esta deshabilitado hasta que lanzemos la realizacion de pedidos el 3 de Octubre.
+    <p style="text-align: right"><a href="#top" onclick="$.cookie('seen_foi2', 1, { expires: 7, path: '/' }); $('#everypage').hide('slow'); return false;">Cerrar</a></p>
     </div>
-=end
-%>
+
+<div class="ribbon">
+<!--  <%= link_to _("¡Colabora con nosotros!"), help_help_out_path %> -->
+</div>
+
 <div class="entirebody">
     <div id="banner">
+      <div id="banner_back">
       <div id="banner_inner">
-        <div class="lang"><%= render :partial => 'general/locale_switcher' %></div>
-        
+        <%= render :partial => 'general/topnav' %>
+
+        <%= render :partial => 'general/orglink' %>
+
         <% if not (controller.action_name == 'signin' or controller.action_name == 'signup') %>
-          <div id="logged_in_bar">
+		<%= render :partial => 'general/usernav' %>
+        <!--  <div id="logged_in_bar">
           <% if @user %>
               <%= _('Hello, {{username}}!', :username => h(@user.name))%>
 
@@ -111,21 +93,18 @@
           <% else %>
               <%= link_to _("Sign in or sign up"), signin_url(:r => request.request_uri) %>
           <% end %>
-          </div>
-        <% end %>   
+          </div>-->
+        <% end %>
 
-        <div id="navigation_search">
+<!--        <div id="navigation_search">
             <% form_tag({:controller => "general", :action => "search_redirect"}, {:id => "navigation_search_form"}) do %>
                <p>
                    <%= text_field_tag 'query', params[:query], { :size => 40, :id => "navigation_search_query" } %>
                    <%= image_submit_tag('search-button.png') %>
                </p>
-            <% end %>
-        </div>
-        
-        <%= render :partial => 'general/orglink' %>
-        
-        <%= render :partial => 'general/topnav' %>
+          <% end %>
+        </div>-->
+      </div>
       </div>
     </div>
     <div id="wrapper">
@@ -150,10 +129,9 @@
 </div>
 <div id="other-country-notice"></div>
 <div id="link_box"><span class="close-button">X</span>
-<%= _("Paste this link into emails, tweets, and anywhere else:") %>
-<br />
-<input type="text">
+  <%= _("Paste this link into emails, tweets, and anywhere else:") %>
+  <br />
+  <input type="text">
 </div>
-    </body>
+</body>
 </html>
-
