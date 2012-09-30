@@ -246,8 +246,7 @@ msgid "<a href=\"%s\">what's that?</a>"
 msgstr "<a href=\"%s\">¿Qué es eso?</a>"
 
 #: app/controllers/request_game_controller.rb:23
-msgid ""
-"<p>All done! Thank you very much for your help.</p><p>There are <a "
+msgid "<p>All done! Thank you very much for your help.</p><p>There are <a "
 "href=\"{{helpus_url}}\">more things you can do</a> to help "
 "{{site_name}}.</p>"
 msgstr "<p>¡Ya está! Muchas gracias por su ayuda.</p><p>Hay <a href=\"{{helpus_url}}\">más cosas que puede hacer</a> para ayudar a {{site_name}}.</p>"
@@ -257,61 +256,52 @@ msgid "<p>Thank you! Here are some ideas on what to do next:</p><ul><li>To send 
 msgstr "<p>¡Gracias! Algunas ideas sobre qué hacer a continuación:</p>\n            <ul>\n            <li>Para mandar la solicitud a otro organismo, copia su texto y <a href=\"{{find_authority_url}}\">encuentra otro organismo</a>.</li>\n            <li>Si quieres contestar la afirmación del organismo de que no tienen la información, aquí te explicamos \n            <a href=\"{{complain_url}}\">cómo apelar</a>.\n            </li>\n            <li>Tenemos <a href=\"{{other_means_url}}\">sugerencias</a>\n            sobre otras formas de contestar tu pregunta.\n            </li>\n            </ul>"
 
 #: app/controllers/request_controller.rb:435
-msgid ""
-"<p>Thank you! Hope you don't have to wait much longer.</p> <p>By law, you "
+msgid "<p>Thank you! Hope you don't have to wait much longer.</p> <p>By law, you "
 "should have got a response promptly, and normally before the end of "
 "<strong>{{date_response_required_by}}</strong>.</p>"
 msgstr "<p>¡Gracias! Esperamos que no tenga que esperar mucho más.</p> <p>Por ley, debería recibir una respuesta pronto, y normalmente antes del final de <strong>{{date_response_required_by}}</strong>.</p>"
 
 #: app/controllers/request_controller.rb:431
-msgid ""
-"<p>Thank you! Hopefully your wait isn't too long.</p> <p>By law, you should get a response promptly, and normally before the end of <strong>\n"
+msgid "<p>Thank you! Hopefully your wait isn't too long.</p> <p>By law, you should get a response promptly, and normally before the end of <strong>\n"
 "{{date_response_required_by}}</strong>.</p>"
 msgstr "<p>¡Gracias! Esperamos que su espera no sea demasiado larga.</p> <p>Por ley, debería recibir una respuesta pronto, y normalmente antes del fin de <strong>\n{{date_response_required_by}}</strong>.</p>"
 
 #: app/controllers/request_controller.rb:470
-msgid ""
-"<p>Thank you! Hopefully your wait isn't too long.</p><p>You should get a "
+msgid "<p>Thank you! Hopefully your wait isn't too long.</p><p>You should get a "
 "response within {{late_number_of_days}} days, or be told if it will take "
 "longer (<a href=\"{{review_url}}\">details</a>).</p>"
 msgstr "<p>¡Gracias! Deseamos que su espera no sea demasiado larga.</p><p>Debería recibir una respuesta en {{late_number_of_days}} días, o ser informado de que tardará más (<a href=\"{{review_url}}\">más información</a>).</p>"
 
 #: app/controllers/request_controller.rb:473
-msgid ""
-"<p>Thank you! We'll look into what happened and try and fix it up.</p><p>If "
+msgid "<p>Thank you! We'll look into what happened and try and fix it up.</p><p>If "
 "the error was a delivery failure, and you can find an up to date FOI email "
 "address for the authority, please tell us using the form below.</p>"
 msgstr "<p>¡Gracias! Investigaremos lo ocurrido y trataremos de arreglarlo.</p><p> Si el error ha sido al intentar entregar el correo, y puede encontrar una dirección más actualizada para este organismo, por favor indíquenoslo en el siguiente formulario.</p>"
 
 #: app/controllers/request_controller.rb:438
-msgid ""
-"<p>Thank you! Your request is long overdue, by more than "
+msgid "<p>Thank you! Your request is long overdue, by more than "
 "{{very_late_number_of_days}} working days. Most requests should be answered "
 "within {{late_number_of_days}} working days. You might like to complain "
 "about this, see below.</p>"
 msgstr "<p>¡Gracias! Tu solicitud está muy retrasada, han pasado más de {{very_late_number_of_days}} días laborales. La mayoría de las solicitudes deberían ser respondidas en {{late_number_of_days}} días laborales. Puede reclamar sobre esta situación, como se explica más abajo.</p>"
 
 #: app/controllers/user_controller.rb:530
-msgid ""
-"<p>Thanks for changing the text about you on your profile.</p>\n"
+msgid "<p>Thanks for changing the text about you on your profile.</p>\n"
 "            <p><strong>Next...</strong> You can upload a profile photograph too.</p>"
 msgstr "<p>Gracias por actualizar el texto de su perfil personal.</p>\n            <p><strong>Ahora...</strong> puede subir también una foto a su perfil.</p>"
 
 #: app/controllers/user_controller.rb:451
-msgid ""
-"<p>Thanks for updating your profile photo.</p>\n"
+msgid "<p>Thanks for updating your profile photo.</p>\n"
 "                <p><strong>Next...</strong> You can put some text about you and your research on your profile.</p>"
 msgstr "<p>Gracias por actualizar la foto de su perfil.</p>\n                <p><strong>Ahora...</strong> puede escribir sobre usted y su investigación en su perfil.</p>"
 
 #: app/controllers/request_controller.rb:320
-msgid ""
-"<p>We recommend that you edit your request and remove the email address.\n"
+msgid "<p>We recommend that you edit your request and remove the email address.\n"
 "                If you leave it, the email address will be sent to the authority, but will not be displayed on the site.</p>"
 msgstr "<p>Le aconsejamos que edite su solicitud y elimine su dirección de correo.\n                Si la deja, tu dirección será enviada al organismo público, pero no será visible en esta web.</p>"
 
 #: app/controllers/request_controller.rb:459
-msgid ""
-"<p>We're glad you got all the information that you wanted. If you write "
+msgid "<p>We're glad you got all the information that you wanted. If you write "
 "about or make use of the information, please come back and add an annotation"
 " below saying what you did.</p><p>If you found {{site_name}} useful, <a "
 "href=\"{{donation_url}}\">make a donation</a> to the charity which runs "
@@ -319,29 +309,25 @@ msgid ""
 msgstr "<p>Nos alegra saber que ha obtenido toda la información que solicitó. Si escribe sobre ella, o la utiliza, por favor vuelva y añada un comentario a continuación explicando lo que ha hecho.</p><p>Si {{site_name}} le ha resultado útil, <a href=\"{{donation_url}}\">puede donar</a> a la ONG responsable.</p>"
 
 #: app/controllers/request_controller.rb:462
-msgid ""
-"<p>We're glad you got some of the information that you wanted. If you found "
+msgid "<p>We're glad you got some of the information that you wanted. If you found "
 "{{site_name}} useful, <a href=\"{{donation_url}}\">make a donation</a> to "
 "the charity which runs it.</p><p>If you want to try and get the rest of the "
 "information, here's what to do now.</p>"
 msgstr "<p>Nos alegra saber que ha obtenido parte de la información que solicitó. Si escribe sobre ella, o la utiliza, por favor vuelva y añada un comentario a continuación explicando lo que ha hecho.</p><p>Si {{site_name}} le ha resultado útil, <a href=\"{{donation_url}}\">puede donar</a> a la ONG responsable.</p>"
 
 #: app/controllers/request_controller.rb:318
-msgid ""
-"<p>You do not need to include your email in the request in order to get a "
+msgid "<p>You do not need to include your email in the request in order to get a "
 "reply (<a href=\"%s\">details</a>).</p>"
 msgstr "<p>No necesitas incluir tu dirección de correo en la solicitud para recibir una respuesta (<a href=\"%s\">más detalles</a>).</p>"
 
 #: app/controllers/request_controller.rb:316
-msgid ""
-"<p>You do not need to include your email in the request in order to get a "
+msgid "<p>You do not need to include your email in the request in order to get a "
 "reply, as we will ask for it on the next screen (<a "
 "href=\"%s\">details</a>).</p>"
 msgstr "<p>No necesita incluir su dirección de correo en la solicitud para recibir una respuesta, se la pediremos en el siguiente paso (<a href=\"%s\">más detalles</a>).</p>"
 
 #: app/controllers/request_controller.rb:324
-msgid ""
-"<p>Your request contains a <strong>postcode</strong>. Unless it directly "
+msgid "<p>Your request contains a <strong>postcode</strong>. Unless it directly "
 "relates to the subject of your request, please remove any address as it will"
 " <strong>appear publicly on the Internet</strong>.</p>"
 msgstr "<p>Tu solicitud incluye un <strong>código postal</strong>. Salvo que esté directamente relacionado con su solicitud, por favor elimina cualquier dirección, ya que <strong>estará disponible públicamente en Internet</strong>.</p>"
