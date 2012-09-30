@@ -807,11 +807,14 @@ class RequestController < ApplicationController
     def search_typeahead
         # Since acts_as_xapian doesn't support the Partial match flag, we work around it
         # by making the last work a wildcard, which is quite the same
-        query = params[:q]
-        @xapian_requests = perform_search_typeahead(query, InfoRequestEvent)
-        render :partial => "request/search_ahead.rhtml"
+        if !params[:q].nil?
+            query = params[:q]
+	else
+	   raise ActionController::RoutingError.new('El parámerto de búsqueda es inválido. Por favor utilice el formulario.')
+        end
+	@xapian_requests = perform_search_typeahead(query, InfoRequestEvent)
+	render :partial => "request/search_ahead.rhtml"
     end
-
     def download_entire_request
         @locale = self.locale_from_params()
         PublicBody.with_locale(@locale) do

@@ -190,9 +190,13 @@ class PublicBodyController < ApplicationController
     def search_typeahead
         # Since acts_as_xapian doesn't support the Partial match flag, we work around it
         # by making the last work a wildcard, which is quite the same
-        query = params[:query]
-        @xapian_requests = perform_search_typeahead(query, PublicBody)
-        render :partial => "public_body/search_ahead"
+        if !params[:query].nil?
+            query = params[:query]
+        else
+	    raise ActionController::RoutingError.new('Su búsqueda es inválida, por favor utilice el formulario para realizarla.')
+	end
+	@xapian_requests = perform_search_typeahead(query, PublicBody)
+	render :partial => "public_body/search_ahead"
     end
 end
 
