@@ -443,7 +443,7 @@ class RequestController < ApplicationController
       # Display advice for requester on what to do next, as appropriate
       if @info_request.calculate_status == 'waiting_response'
           flash[:notice] = _("<p>Thank you! Hopefully your wait isn't too long.</p> <p>By law, you should get a response promptly, and normally before the end of <strong>
-{{te_response_required_by}}</strong>.</p>",:date_response_required_by=>simple_date(@info_request.date_response_required_by))
+{{date_response_required_by}}</strong>.</p>",:date_response_required_by=>simple_date(@info_request.date_response_required_by))
           redirect_to request_url(@info_request)
       elsif @info_request.calculate_status == 'waiting_response_overdue'
           flash[:notice] = _("<p>Thank you! Hope you don't have to wait much longer.</p> <p>By law, you should have got a response promptly, and normally before the end of <strong>{{date_response_required_by}}</strong>.</p>",:date_response_required_by=>simple_date(@info_request.date_response_required_by))
