@@ -159,7 +159,7 @@ msgstr[1] "%d solicitudes enviadas."
 
 #: app/views/request/new.rhtml:92
 msgid "'Crime statistics by ward level for Wales'"
-msgstr "'Estadísticas de crímenes por ciudad en Uruguay'"
+msgstr "'Cantidad de automoviles particulares y taxis empadronados en Montevideo en el año 2010.'"
 
 #: app/views/request/new.rhtml:90
 msgid "'Pollution levels over time for the River Tyne'"
