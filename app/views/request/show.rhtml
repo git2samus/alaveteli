@@ -42,25 +42,25 @@
                     :public_body_admin_url => public_body_admin_url(@info_request.public_body)) %>
         <% else %>
             <%= _('{{user}} made this {{law_used_full}} request',:user=>user_link(@info_request.user), :law_used_full=>h(@info_request.law_used_full)) %>
-            <%= _('to {{public_body}}',:public_body=>public_body_link(@info_request.public_body)) %> 
+            <%= _('to {{public_body}}',:public_body=>public_body_link(@info_request.public_body)) %>
         <% end %>
     </p>
 
     <p id="request_status" class="request_icon_line icon_<%= @info_request.calculate_status %>">
     <% if @info_request.awaiting_description %>
         <% if @is_owning_user %>
-            <%= _('Please <strong>answer the question above</strong> so we know whether the ')%> 
-            <%= MySociety::Format.fancy_pluralize(@new_responses_count, 'recent response contains', 'recent responses contain') %> <%= _('useful information.') %>
+            <%= _('Please <strong>answer the question above</strong> so we know whether the ')%>
+            <%= MySociety::Format.fancy_pluralize(@new_responses_count, 'la respuesta reciente contiene', 'las respuetas recienten contienen') %> <%= _('useful information.') %>
         <% else %>
             <%= _('This request has an <strong>unknown status</strong>.') %>
             <% if @old_unclassified %>
-              <%= _('We\'re waiting for someone to read') %> 
+              <%= _('We\'re waiting for someone to read') %>
               <%= MySociety::Format.fancy_pluralize(@new_responses_count, 'a recent response', 'recent responses') %>
               <%= _('and update the status accordingly. Perhaps <strong>you</strong> might like to help out by doing that?') %>
             <% else %>
             <%=  _('We\'re waiting for') %>
-              <%= user_link(@info_request.user) %> <%= _('to read') %> 
-              <%= MySociety::Format.fancy_pluralize(@new_responses_count, 'a recent response', 'recent responses') %> 
+              <%= user_link(@info_request.user) %> <%= _('to read') %>
+              <%= MySociety::Format.fancy_pluralize(@new_responses_count, 'a recent response', 'recent responses') %>
               <%= _('and update the status.') %>
             <% end %>
         <% end %>
@@ -69,7 +69,7 @@
         <% if @info_request.public_body.is_school? %>
         <%= _('in term time') %>
         <% else %>
-        <%= _('normally') %> 
+        <%= _('normally') %>
         <% end %>
         <%= _('no later than') %> <strong><%= simple_date(@info_request.date_response_required_by) %></strong>
         (<%= link_to "details", "/help/requesting#quickly_response" %>).
@@ -77,12 +77,12 @@
         <%= _('Response to this request is <strong>delayed</strong>.') %>
 		<%= _('By law, {{public_body_link}} should normally have responded <strong>promptly</strong> and',:public_body_link=>public_body_link(@info_request.public_body)) %>
             <% if @info_request.public_body.is_school? %>
-            <%= _('in term time') %> 
+            <%= _('in term time') %>
             <% end %>
             <%= _('by') %> <strong><%= simple_date(@info_request.date_response_required_by) %></strong>
 		(<%= _('<a href="%s">details</a>') % [help_requesting_path + '#quickly_response'] %>)
     <% elsif @status == 'waiting_response_very_overdue' %>
-        <%= _('Response to this request is <strong>long overdue</strong>.') %> 
+        <%= _('Response to this request is <strong>long overdue</strong>.') %>
 		<%= _('By law, under all circumstances, {{public_body_link}} should have responded by now',:public_body_link => public_body_link(@info_request.public_body)) %>
         (<%= _('<a href="%s">details</a>') % [help_requesting_path + '#quickly_response'] %>).
         <%= _('You can <strong>complain</strong> by') %>
@@ -97,11 +97,11 @@
         <%= _('The request was <strong>partially successful</strong>.') %>
     <% elsif @status == 'waiting_clarification' %>
         <% if @is_owning_user %>
-            <%=h @info_request.public_body.name %> <%= _('is <strong>waiting for your clarification</strong>.') %> 
+            <%=h @info_request.public_body.name %> <%= _('is <strong>waiting for your clarification</strong>.') %>
             <%= _('Please') %>
               <%= link_to _("send a follow up message"), respond_to_last_url(@info_request) + '#followup' %>.
         <% else %>
-            <%= _('The request is <strong>waiting for clarification</strong>.') %> 
+            <%= _('The request is <strong>waiting for clarification</strong>.') %>
 			<%= _('If you are {{user_link}}, please',:user_link=>user_link(@info_request.user)) %>
             <%= link_to _("sign in"), signin_url(:r => request.request_uri) %> <%= _('to send a follow up message.') %>
         <% end %>
@@ -114,7 +114,7 @@
     <% elsif @status == 'requires_admin' %>
         <%= _('This request has had an unusual response, and <strong>requires attention</strong> from the {{site_name}} team.', :site_name=>site_name) %>
     <% elsif @status == 'user_withdrawn' %>
-        <%= _('This request has been <strong>withdrawn</strong> by the person who made it. 
+        <%= _('This request has been <strong>withdrawn</strong> by the person who made it.
         	   There may be an explanation in the correspondence below.') %>
     <% else %>
         <%= render :partial => 'general/custom_state_descriptions', :locals => { :status => @status } %>
