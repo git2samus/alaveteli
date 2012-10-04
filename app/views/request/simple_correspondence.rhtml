@@ -34,9 +34,9 @@ elsif [ 'sent', 'followup_sent' ].include?(info_request_event.event_type)
 <%= text %>
 <% elsif [ 'resent', 'followup_resent' ].include?(info_request_event.event_type) %>
 <%= _('Date:') %> <%= simple_date(info_request_event.created_at) %>
-Sent <% if info_request_event.outgoing_message.message_type == 'initial_request' %> request <% elsif info_request_event.outgoing_message.message_type == 'followup' %> a follow up <% else %> <% raise "unknown message_type" %><% end %> to <%= public_body_link(@info_request.public_body) %> again<% if not info_request_event.same_email_as_previous_send? %>, using a new contact address<% end %>.
+<% if info_request_event.outgoing_message.message_type == 'initial_request' %> Pedido <% elsif info_request_event.outgoing_message.message_type == 'followup' %> Un seguimiento <% else %> <% raise "unknown message_type" %><% end %> fue enviado a <%= public_body_link(@info_request.public_body) %> nuevamente<% if not info_request_event.same_email_as_previous_send? %>, usando una nueva direccion de contacto<% end %>.
 
-<% elsif info_request_event.event_type == 'comment' 
+<% elsif info_request_event.event_type == 'comment'
     comment = info_request_event.comment
 %>
 <%= _("{{username}} left an annotation:", :username =>comment.user.name) %> (<%= simple_date(comment.created_at || Time.now) %>)
