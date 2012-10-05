@@ -333,12 +333,7 @@ msgid "<p>Your request contains a <strong>postcode</strong>. Unless it directly 
 msgstr "<p>Tu solicitud incluye un <strong>código postal</strong>. Salvo que esté directamente relacionado con su solicitud, por favor elimina cualquier dirección, ya que <strong>estará disponible públicamente en Internet</strong>.</p>"
 
 #: app/controllers/request_controller.rb:352
-msgid ""
-"<p>Your {{law_used_full}} request has been <strong>sent on its way</strong>!</p>\n"
-"            <p><strong>We will email you</strong> when there is a response, or after {{late_number_of_days}} working days if the authority still hasn't\n"
-"            replied by then.</p>\n"
-"            <p>If you write about this request (for example in a forum or a blog) please link to this page, and add an \n"
-"            annotation below telling people about your writing.</p>"
+msgid "<p>Your {{law_used_full}} request has been <strong>sent on its way</strong>!</p>\n<p><strong>We will email you</strong> when there is a response, or after {{late_number_of_days}} working days if the authority still hasn't\n replied by then.</p>\n<p>If you write about this request (for example in a forum or a blog) please link to this page, and add an \n annotation below telling people about your writing.</p>"
 msgstr "<p>¡Tu solicitud de {{law_used_full}} ha sido <strong>enviada</strong>!</p>\n<p><strong>Te avisaremos por correo</strong> cuando haya una respuesta, o en {{late_number_of_days}} días laborables si el organismo todavía no ha respondido.</p>\n<p>Si escribes sobre esta solicitud (en un foro o blog, por ejemplo) por favor enlaza a esta página, y añade un comentario a continuación informando a posibles interesados.</p>"
 
 #: app/controllers/application_controller.rb:311
