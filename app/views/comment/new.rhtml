@@ -1,4 +1,4 @@
-<% @title = "Make an annotation on '" + h(@info_request.title) + "'" %>
+<% @title = "Hacer un comentario en '" + h(@info_request.title) + "'" %>
 
 <% if @existing_comment %>
     <div class="errorExplanation" id="errorExplanation"><ul>
@@ -67,7 +67,7 @@
 </ul>
 
 <p>
-    <big><%= _('Annotations will be posted publicly here, and are 
+    <big><%= _('Annotations will be posted publicly here, and are
         <strong>not</strong> sent to {{public_body_name}}.',:public_body_name=>h(@info_request.public_body.name)) %></big>
 </p>
 
