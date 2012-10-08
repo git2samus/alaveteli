@@ -28,7 +28,11 @@ class WorldFOIWebsites
                               {:name => "Acceso Intelligente",
                                   :country_name => _("Chile"),
                                   :country_iso_code => "CL",
-                                  :url => "accesointeligente.org"}]
+                                  :url => "http://accesointeligente.org"},
+                              {:name => "Qué Sabés?",
+                                  :country_name => _("Uruguay"),
+                                  :country_iso_code => "UY",
+                                  :url => "http://quesabes.org"}]
         return world_foi_websites
     end
 
@@ -37,4 +41,4 @@ class WorldFOIWebsites
         return result
     end
 end
-            
+
