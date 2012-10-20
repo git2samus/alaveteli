@@ -186,7 +186,7 @@ msgid ""
 "Yours,\n"
 "\n"
 "{{user_name}}"
-msgstr ",\n\n\n\nUn saludo,\n\n{{user_name}}"
+msgstr ",\n\n\n\nUn cordial saludo,\n\n{{user_name}}"
 
 #: app/views/user/sign.rhtml:28
 msgid "- or -"
@@ -910,21 +910,9 @@ msgstr "Estimado {{public_body_name}},"
 #: app/models/outgoing_message.rb:89
 msgid "default_request_letter"
 msgstr "De mi mayor  consideración:\n\n\n"
-       "Me dirijo a esta Oficina a los efectos de realizar la siguiente peticion:\n\n"
-       " La ley 18.381 establece en su artículo 3 el derecho -sin necesidad de"
-       " justificación alguna- de cualquier persona física o jurídica a acceder a "
-       " información en poder de los organismos públicos, estatales o no estatales."
-       " Asimismo, en sus artículos 13 y siguientes establece un procedimiento "
-       " preciso por el cual la administración se encuentra obligada a entregarme la "
-       " información requerida en el palazo de 20 días hábiles.\n\n"
-       "En este marco, solicito a usted me haga entrega de la siguiente información"
-       " en formato electronico\n"
-       "\n\n\n\n<REDACTE EL PEDIDO ACA>\n\n\n\n"
-       " En virtud de lo expuesto, y de acuerdo de lo dictado en la normativa"
-       " citada, PIDO: Se entregue por la dirección a su cargo, en el plazo"
-       " establecido por el artículo 15 de la Ley 18. l381 la información requerida"
-       " en el presente escrito."
-
+       "Me dirijo a esta Oficina a los efectos de realizar una pedido de acceso a la información pública, conforme a la ley 18381. Solicito me entregue\n\n"
+       "\n\n\n\n(detallar aqui la información requerida)\n\n\n\n"
+       "A estos efectos, solicito que se comunique conmigo mediante la dirección de correo establecida en este pedido, fijando mi domicilio en San José 1330 piso 1 Montevideo. A su vez solicito que la entrega de la información sea preferentemente en formato electrónico."
 
 #: app/models/request_mailer.rb:87
 msgid "Delayed response to your FOI request - "
