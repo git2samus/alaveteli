@@ -910,7 +910,7 @@ msgstr "Estimado {{public_body_name}},"
 #: app/models/outgoing_message.rb:89
 msgid "default_request_letter"
 msgstr "De mi mayor  consideración:\n\n\n"
-       "Me dirijo a esta Oficina a los efectos de realizar una pedido de acceso a la información pública, conforme a la ley 18381. Solicito me entregue\n\n"
+       "Me dirijo a esta Oficina a los efectos de realizar un pedido de acceso a la información pública, conforme a la ley 18381. Solicito me entregue\n\n"
        "\n\n\n\n(detallar aqui la información requerida)\n\n\n\n"
        "A estos efectos, solicito que se comunique conmigo mediante la dirección de correo establecida en este pedido, fijando mi domicilio en San José 1330 piso 1 Montevideo. A su vez solicito que la entrega de la información sea preferentemente en formato electrónico."
 
