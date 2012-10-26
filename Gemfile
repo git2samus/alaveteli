@@ -31,7 +31,7 @@ gem 'ruby-msg', '~> 1.5.0'
 gem 'test-unit', '~> 1.2.3' if RUBY_VERSION.to_f >= 1.9
 gem 'vpim'
 gem 'will_paginate', '~> 2.3.11'
-gem 'xapian-full'
+gem "xapian-full-alaveteli", "~> 1.2.9.5"
 gem 'xml-simple'
 gem 'zip'
 
