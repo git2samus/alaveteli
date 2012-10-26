@@ -37,21 +37,20 @@ namespace :xapian do
   end
 end
 
-<<<<<<< HEAD
-
 namespace :deploy do
   desc 'Link configuration after a code update'
   task :symlink_configuration do
     links = {
-
-    "#{shared_path}/system/config/database.yml" => "#{release_path}/config/database.yml",
-    "#{shared_path}/system/config/general.yml" => "#{release_path}/config/general.yml",
-    "#{shared_path}/system/config/i18n-routes.yml" => "#{release_path}/config/i18n-routes.yml",
-    "#{shared_path}/system/config/rails_env.rb" => "#{release_path}/config/rails_env.rb",
-    "#{shared_path}/system/xapiandbs" => "#{release_path}/vendor/plugins/acts_as_xapian/xapiandbs",
-    "#{shared_path}/system/files" => "#{release_path}/files",
-    "#{shared_path}/cache" => "#{release_path}/cache"
-    # "#{release_path}/public/download" => "#{release_path}/cache/zips/download"
+      "#{release_path}/config/database.yml" => "#{shared_path}/database.yml",
+      "#{release_path}/config/general.yml" => "#{shared_path}/general.yml",
+      "#{release_path}/config/memcached.yml" => "#{shared_path}/memcached.yml",
+      "#{release_path}/config/rails_env.rb" => "#{shared_path}/rails_env.rb",
+      "#{release_path}/public/foi-live-creation.png" => "#{shared_path}/foi-live-creation.png",
+      "#{release_path}/public/foi-user-use.png" => "#{shared_path}/foi-user-use.png",
+      "#{release_path}/files" => "#{shared_path}/files",
+      "#{release_path}/cache" => "#{shared_path}/cache",
+      "#{release_path}/vendor/plugins/acts_as_xapian/xapiandbs" => "#{shared_path}/xapiandbs",
+      "#{release_path}/public/download" => "#{release_path}/cache/zips/download"
     }
 
     # "ln -sf <a> <b>" creates a symbolic link but deletes <b> if it already exists
