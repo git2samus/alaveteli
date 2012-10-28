@@ -8,6 +8,7 @@
 require 'fastercsv'
 
 class PublicBodyController < ApplicationController
+
     # XXX tidy this up with better error messages, and a more standard infrastructure for the redirect to canonical URL
     def show
         long_cache
