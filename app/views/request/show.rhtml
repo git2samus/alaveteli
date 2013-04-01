@@ -93,7 +93,7 @@
         <%= public_body_link(@info_request.public_body) %> <%= _('<strong>did not have</strong> the information requested.') %>
     <% elsif @status == 'rejected' %>
         <%= _('The request was <strong>refused</strong> by') %> <%= public_body_link(@info_request.public_body) %>.
-	<br> <%= _("If you think the rejection was unjustified, please make a complain through the Public Information Access Unit ") %> <a href="http://www.uaip.gub.uy/wps/wcm/connect/37a10e004ad37caf9acddb5619f13f97/formulario-solicitud-uaip_1.pdf?MOD=AJPERES" target="_blank" class="botones"><%= _("Complaint") %></a>
+	<br> <%= _("If you think the rejection was unjustified, please make a complain through the Public Information Access Unit ") %> <a href="http://www.uaip.gub.uy/wps/wcm/connect/37a10e004ad37caf9acddb5619f13f97/formulario-solicitud-uaip_1.pdf?MOD=AJPERES" target="_blank" class="botones"><%= _("Complain") %></a>
     <% elsif @status == 'successful' %>
         <%= _('The request was <strong>successful</strong>.') %>
     <% elsif @status == 'partially_successful' %>
