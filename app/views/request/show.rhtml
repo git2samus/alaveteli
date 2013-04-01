@@ -81,17 +81,19 @@
             <% end %>
             <%= _('by') %> <strong><%= simple_date(@info_request.date_response_required_by) %></strong>
 		(<%= _('<a href="%s">details</a>') % [help_requesting_path + '#quickly_response'] %>)
+	<br> <%= _("You can make a complain to the Public Information Access Unit by filling the form: ") %> <a href="http://www.uaip.gub.uy/wps/wcm/connect/37a10e004ad37caf9acddb5619f13f97/formulario-solicitud-uaip_1.pdf?MOD=AJPERES" target="_blank" class="botones"><%= _("Complain") %></a>
     <% elsif @status == 'waiting_response_very_overdue' %>
         <%= _('Response to this request is <strong>long overdue</strong>.') %>
 		<%= _('By law, under all circumstances, {{public_body_link}} should have responded by now',:public_body_link => public_body_link(@info_request.public_body)) %>
         (<%= _('<a href="%s">details</a>') % [help_requesting_path + '#quickly_response'] %>).
         <%= _('You can <strong>complain</strong> by') %>
         <%= link_to _("requesting an internal review"), show_response_no_followup_url(:id => @info_request.id, :incoming_message_id => nil) + "?internal_review=1#followup" %>.
-<br>Puede realizar una denuncia frente a la Unidad de Acceso a la Información Pública haciendo click <a href="http://www.uaip.gub.uy/wps/wcm/connect/37a10e004ad37caf9acddb5619f13f97/formulario-solicitud-uaip_1.pdf?MOD=AJPERES" target="_blank">AQUÍ</a>
+	<br> <%= _("You can make a complain to the Public Information Access Unit by filling the form: ") %> <a href="http://www.uaip.gub.uy/wps/wcm/connect/37a10e004ad37caf9acddb5619f13f97/formulario-solicitud-uaip_1.pdf?MOD=AJPERES" target="_blank" class="botones"><%= _("Complain") %></a>
     <% elsif @status == 'not_held' %>
         <%= public_body_link(@info_request.public_body) %> <%= _('<strong>did not have</strong> the information requested.') %>
     <% elsif @status == 'rejected' %>
         <%= _('The request was <strong>refused</strong> by') %> <%= public_body_link(@info_request.public_body) %>.
+	<br> <%= _("If you think the rejection was unjustified, please make a complain through the Public Information Access Unit ") %> <a href="http://www.uaip.gub.uy/wps/wcm/connect/37a10e004ad37caf9acddb5619f13f97/formulario-solicitud-uaip_1.pdf?MOD=AJPERES" target="_blank" class="botones"><%= _("Complaint") %></a>
     <% elsif @status == 'successful' %>
         <%= _('The request was <strong>successful</strong>.') %>
     <% elsif @status == 'partially_successful' %>
@@ -110,7 +112,7 @@
         <%= _('The authority would like to / has <strong>responded by post</strong> to this request.') %>
     <% elsif @status == 'internal_review' %>
 		<%= _('Waiting for an <strong>internal review</strong> by {{public_body_link}} of their handling of this request.',:public_body_link=>public_body_link(@info_request.public_body)) %>
-<br>Puede realizar una denuncia frente a la Unidad de Acceso a la Información Pública haciendo click <a href="http://www.uaip.gub.uy/wps/wcm/connect/37a10e004ad37caf9acddb5619f13f97/formulario-solicitud-uaip_1.pdf?MOD=AJPERES" target="_blank">AQUÍ</a>
+	<br> <%= _("You can make a complain to the Public Information Access Unit by filling the form: ") %> <a href="http://www.uaip.gub.uy/wps/wcm/connect/37a10e004ad37caf9acddb5619f13f97/formulario-solicitud-uaip_1.pdf?MOD=AJPERES" target="_blank" class="botones"><%= _("Complain") %></a>
     <% elsif @status == 'error_message' %>
         <%= _('There was a <strong>delivery error</strong> or similar, which needs fixing by the {{site_name}} team.', :site_name=>site_name) %>
     <% elsif @status == 'requires_admin' %>
