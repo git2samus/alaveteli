@@ -2,7 +2,7 @@
 # current version of Rails won't use that.  So for now, monkeypatch,
 # This can be dropped when we move to Rails 3.
 #
-# See https://github.com/sebbacon/alaveteli/issues/38 for Alaveteli
+# See https://github.com/mysociety/alaveteli/issues/38 for Alaveteli
 # bug report
 # 
 # More info about the monkeypatch:

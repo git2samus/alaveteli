@@ -2,7 +2,7 @@ require File.expand_path(File.dirname(__FILE__) + '/../spec_helper')
 
 describe "When creating requests" do
     it "should associate the request with the requestor, even if it is approved by an admin" do
-        # This is a test for https://github.com/sebbacon/alaveteli/issues/446
+        # This is a test for https://github.com/mysociety/alaveteli/issues/446
         
         params = { :info_request => { :public_body_id => public_bodies(:geraldine_public_body).id,
             :title => "Why is your quango called Geraldine?", :tag_string => "" },

@@ -1,12 +1,12 @@
 These instructions assume Debian Squeeze or Ubuntu 10.04 LTS.
-[Install instructions for OS X](https://github.com/sebbacon/alaveteli/wiki/OS-X-Quickstart)
+[Install instructions for OS X](https://github.com/datauy/alaveteli/wiki/OS-X-Quickstart)
 are under development.  Debian Squeeze is the best supported
 deployment platform.
 
 Commands are intended to be run via the terminal or over ssh.
 
 As an aid to evaluation, there is an
-[Amazon AMI](https://github.com/sebbacon/alaveteli/wiki/Alaveteli-ec2-amix)
+[Amazon AMI](https://github.com/datauy/alaveteli/wiki/Alaveteli-ec2-ami)
 with all these steps configured.  It is *not* production-ready.
 
 # Get Alaveteli
@@ -123,7 +123,7 @@ in certain edge conditions.  Until it's incorporated into an official
 release, you can either hope you don't encounter the bug (it ties up a
 rails process until you kill it) you'll need to patch it yourself or
 use the Debian package compiled by mySociety (see link in
-[issue 305](https://github.com/sebbacon/alaveteli/issues/305))
+[issue 305](https://github.com/mysociety/alaveteli/issues/305))
 
 
 # Configure Database 
@@ -369,7 +369,7 @@ server behind an http accelerator like Varnish.  A sample varnish VCL
 is supplied in `../conf/varnish-alaveteli.vcl`.
 
 Some
-[production server best practice notes](https://github.com/sebbacon/alaveteli/wiki/Production-Server-Best-Practices)
+[production server best practice notes](https://github.com/datauy/alaveteli/wiki/Production-Server-Best-Practices)
 are evolving on the wiki.
 
 # Troubleshooting
@@ -440,7 +440,7 @@ are evolving on the wiki.
         set document.codepage.force_assumed = 1
 
     You should also check that your locale is set up correctly.  See 
-    [https://github.com/sebbacon/alaveteli/issues/128#issuecomment-1814845](this issue followup)
+    [https://github.com/mysociety/alaveteli/issues/128#issuecomment-1814845](this issue followup)
     for further discussion.
     
 *   **I'm getting lots of `SourceIndex.new(hash) is deprecated` errors when running the tests**

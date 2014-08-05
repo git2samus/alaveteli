@@ -36,10 +36,10 @@ places:
 
 This document is about what you can do in a theme.
 
-To get started, install the sample theme by running 
+To get started, install the sample theme by running
 
-    ./script/plugin install git://github.com/sebbacon/alavetelitheme.git
-    
+    ./script/plugin install git://github.com/mysociety/alavetelitheme.git
+
 This downloads and installs the theme in
 `vendor/plugins/alavetelitheme` and contains examples for nearly
 everything you might want to customise.
@@ -95,7 +95,7 @@ locale you support.
 # Customising the request states
 
 As mentioned above, if you can possibly live with the
-[default Alaveteli request statuses](https://github.com/sebbacon/alaveteli/wiki/Alaveteli's-request-statuses),
+[default Alaveteli request statuses](https://github.com/datauy/alaveteli/wiki/Alaveteli's-request-statuses),
 it would be good to do so.  Note that you can set how many days counts
 as "overdue" in the main site config file.
 

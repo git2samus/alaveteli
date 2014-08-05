@@ -387,7 +387,7 @@ describe PublicBody, " when loading CSV files" do
         csv_contents = load_file_fixture("fake-authority-type-with-field-names.csv")
         # Depending on the runtime environment (Ruby version? OS?) the list of available locales
         # is made of strings or symbols, so we use 'en' here as a string to test both scenarios.
-        # See https://github.com/sebbacon/alaveteli/issues/193
+        # See https://github.com/mysociety/alaveteli/issues/193
         errors, notes = PublicBody.import_csv(csv_contents, '', 'replace', true, 'someadmin', ['en', :xx]) # true means dry run
         errors.should == []
         notes.size.should == 4

@@ -105,7 +105,7 @@ describe GeneralController, "when searching" do
         it 'should list the newest successful request first' do
             # Make sure the newest is listed first even if an older one
             # has a newer comment or was reclassified more recently:
-            #   https://github.com/sebbacon/alaveteli/issues/370
+            #   https://github.com/mysociety/alaveteli/issues/370
             #
             # This is a deliberate behaviour change, in that the
             # previous behaviour (showing more-recently-reclassified

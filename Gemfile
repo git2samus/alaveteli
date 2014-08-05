@@ -1,4 +1,4 @@
-# Work around bug in Debian Squeeze - see https://github.com/sebbacon/alaveteli/pull/297#issuecomment-4101012
+# Work around bug in Debian Squeeze - see https://github.com/mysociety/alaveteli/pull/297#issuecomment-4101012
 if File.exist? "/etc/debian_version"
   DEBIAN_VERSION = File.open("/etc/debian_version").read.strip
   if  DEBIAN_VERSION == "6.0.4" || DEBIAN_VERSION == "squeeze/sid"
